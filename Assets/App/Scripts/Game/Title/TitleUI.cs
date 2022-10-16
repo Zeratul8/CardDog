@@ -23,7 +23,7 @@ public class TitleUI : MonoBehaviour
         });
     }
     void LogIn(params object[] param){
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene((int)Constants.SceneName.Lobby);
     }
     void QuitGame(params object[] param)
     {

@@ -40,13 +40,10 @@ public class LobbyUI : MonoBehaviour
 
             TextMeshProUGUI tm = go.GetComponentInChildren<TextMeshProUGUI>();
             tm.text = gameList[i];
-            Button bt = go.GetComponent<Button>();
-            bt.onClick.AddListener(()=>{
-                Debug.Log("게임방 입장."+gameList[i]);
                 //서버 데이터랑 던져주고 response오면 받아서 씬 이동하기.
                 //이때 PlayerPrefs 쓸 건지, Don'tDestroyObject 이용할건지?
-                
-            });
+            RoomObjectScript ros = go.GetComponent<RoomObjectScript>();
+            ros.Init(i);
         }
     }
 }
