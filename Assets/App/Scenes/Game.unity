@@ -2713,6 +2713,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a33c9f0558150e14c969e0b2ab3efe70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cards:
+  - {fileID: 1293743720}
+  - {fileID: 765180009}
+  - {fileID: 1978549694}
+  - {fileID: 1149386161}
+  - {fileID: 1608805864}
+  - {fileID: 372571438}
+  - {fileID: 689882976}
+  - {fileID: 1773777904}
+  - {fileID: 1124879189}
+  - {fileID: 845667071}
 --- !u!1 &1293743716
 GameObject:
   m_ObjectHideFlags: 0
@@ -3309,6 +3320,8 @@ MonoBehaviour:
   - {fileID: -1115849569, guid: f4171c1cb947f0443a1e994a2ac47caf, type: 3}
   - {fileID: 937385738, guid: f4171c1cb947f0443a1e994a2ac47caf, type: 3}
   - {fileID: -383669511, guid: f4171c1cb947f0443a1e994a2ac47caf, type: 3}
+  - {fileID: 21300000, guid: 8d61e7e5d806380489323b96638c22db, type: 3}
+  - {fileID: 21300000, guid: b5b924383a295b142a4d87a9ae3290c8, type: 3}
 --- !u!1 &1446562866
 GameObject:
   m_ObjectHideFlags: 0

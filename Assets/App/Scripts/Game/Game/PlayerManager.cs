@@ -5,9 +5,9 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour
 {
     const string START_GAME = "StartGame";
-    CardScript[] cards;
+    public CardScript[] cards;
     private void Awake() {
-        cards = FindObjectsOfType<CardScript>();
+        // cards = FindObjectsOfType<CardScript>();
         EventManager.AddListner(START_GAME, (object[] param) =>{
             List<CardClass> list = (List<CardClass>)param[0];
             StartCoroutine(ShareCard(list));
