@@ -8,18 +8,9 @@ public class PlayerManager : MonoBehaviour
     int myHand = 0;
     private void Awake()
     {
-        EventManager.AddListner(Constants.START_GAME, (object[] param) =>
-        {
-            List<CardClass> list = (List<CardClass>)param[0];
-            bool isFirst = (bool)param[1];
-            StartCoroutine(ShareCard(list, isFirst));
-        });
-        EventManager.AddListner(Constants.ADD_HAND, (object[] param) =>{
-            myHand++;
-        });
-        EventManager.AddListner(Constants.PUT_CARD, (object[] param) =>{
-            myHand--;
-        });
+        EventManager.AddListner(Constants.START_GAME, StartGame);
+        EventManager.AddListner(Constants.ADD_HAND, AddHand);
+        EventManager.AddListner(Constants.PUT_CARD, PutCard);
     }
     IEnumerator ShareCard(List<CardClass> list, bool isFirst)
     {
@@ -43,8 +34,24 @@ public class PlayerManager : MonoBehaviour
         }
         StartCoroutine(CheckCard());
     }
+    void AddHand(object[] param){
+        myHand++;
+    }
+    void PutCard(object[] param){
+        myHand--;
+    }
+    void StartGame(object[] param){
+        List<CardClass> list = (List<CardClass>)param[0];
+            bool isFirst = (bool)param[1];
+            StartCoroutine(ShareCard(list, isFirst));
+    }
     IEnumerator CheckCard(){
         yield return new WaitWhile(() => myHand != 0);
         EventManager.CallEvent(Constants.FINISH_GAME);
+    }
+    private void OnDestroy() {
+        EventManager.RemoveListener(Constants.START_GAME, StartGame);
+        EventManager.RemoveListener(Constants.ADD_HAND, AddHand);
+        EventManager.RemoveListener(Constants.PUT_CARD, PutCard);
     }
 }
