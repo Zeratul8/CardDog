@@ -79,7 +79,7 @@ public class GameUI : MonoBehaviour
     IEnumerator ShuffleCoroutine(){
         Shuffle();
         yield return new WaitForSeconds(2);
-        EventManager.CallEvent(START_GAME, Shuffle());
+        EventManager.CallEvent(START_GAME, Shuffle(), true);
     }
     List<CardClass> Shuffle(){
         List<CardClass> deck = new List<CardClass>();
