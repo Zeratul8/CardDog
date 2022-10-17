@@ -23,6 +23,7 @@ public class CardScript : MonoBehaviour
         myCardData = cardClass;
         
         image.sprite = gameUI.sprites[cardClass.index];
+        EventManager.CallEvent(Constants.ADD_HAND);
     }
     void OnClick()
     {
@@ -30,6 +31,10 @@ public class CardScript : MonoBehaviour
         Debug.Log(myCardData.month.ToString());
         
         gameObject.SetActive(false);
+        PutCard();
     }
-
+    void PutCard()
+    {
+        EventManager.CallEvent(Constants.PUT_CARD);
+    }
 }

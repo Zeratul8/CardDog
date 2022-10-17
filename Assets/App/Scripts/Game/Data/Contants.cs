@@ -10,4 +10,8 @@ public static class Constants
         Lobby,
         Game
     }
+    public const string START_GAME = "StartGame";
+    public const string FINISH_GAME = "FinishGame";
+    public const string ADD_HAND = "AddHand";
+    public const string PUT_CARD = "PutCard";
 }

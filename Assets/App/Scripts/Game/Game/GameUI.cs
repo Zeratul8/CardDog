@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class GameUI : MonoBehaviour
 {
-    const string START_GAME = "StartGame";
     List<int> intList;
     List<CardClass> basicDeck;
     List<int> SPArr = new List<int>(){4, 12, 16, 20, 24, 29, 32, 36, 41};
@@ -15,6 +14,8 @@ public class GameUI : MonoBehaviour
     List<int> Grass = new List<int>(){13, 17, 25};
     List<int> Bird = new List<int>(){4, 12, 29};
     public List<Sprite> sprites;
+    List<CardClass> deck = new List<CardClass>();
+    public Button btnStart;
     private void Awake() {
         intList = new List<int>();
         for(int i = 0; i<50;i++){
@@ -23,6 +24,10 @@ public class GameUI : MonoBehaviour
         
         basicDeck = new List<CardClass>();
         SetDeck();
+        
+        EventManager.AddListner(Constants.FINISH_GAME, (object[] args)=>{
+            btnStart.gameObject.SetActive(true);
+        });
     }
     void SetDeck(){
         for(int i = 0 ; i<50;i++){
@@ -51,6 +56,8 @@ public class GameUI : MonoBehaviour
             else if (Bird.Contains(i)){
                 sCard = SPECIAL_CARD.FIVEVBIRD;
             }
+
+
             if(i/4 < 12){
                 CardClass c = new CardClass(){
                     index = i,
@@ -71,6 +78,9 @@ public class GameUI : MonoBehaviour
                 basicDeck.Add(c);
             }
         }
+        for(int i = 0 ; i<basicDeck.Count;i++){
+                deck.Add(basicDeck[i]);
+            }
     }
     public void ClickStart(){
         Debug.Log("Start");
@@ -79,11 +89,9 @@ public class GameUI : MonoBehaviour
     IEnumerator ShuffleCoroutine(){
         Shuffle();
         yield return new WaitForSeconds(2);
-        EventManager.CallEvent(START_GAME, Shuffle(), true);
+        EventManager.CallEvent(Constants.START_GAME, Shuffle(), true);
     }
     List<CardClass> Shuffle(){
-        List<CardClass> deck = new List<CardClass>();
-
         for(int i = 0 ; i< intList.Count;i++){
             int r = Random.Range(0, intList.Count);
             int j = intList[i];
@@ -91,8 +99,10 @@ public class GameUI : MonoBehaviour
             intList[r] = j;
         }
 
+        // deck.Clear();
         for(int i = 0 ; i< intList.Count; i++){
-            deck.Add(basicDeck[intList[i]]);
+            deck[i] = basicDeck[intList[i]];
+            // deck.Add(basicDeck[intList[i]]);
         }
         return deck;
     }
