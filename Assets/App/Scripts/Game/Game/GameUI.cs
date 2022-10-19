@@ -35,7 +35,7 @@ public class GameUI : MonoBehaviour
     #region Unity Methods
     private void Awake()
     {
-        EventManager.AddListner(Constants.FINISH_GAME, (object[] args) =>
+        EventManager.AddListener(Constants.FINISH_GAME, (object[] args) =>
         {
             btnStart.gameObject.SetActive(true);
         });

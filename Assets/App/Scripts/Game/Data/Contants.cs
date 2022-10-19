@@ -15,5 +15,7 @@ public static class Constants
     public const string PLUS_HAND = "PlusHand";
     public const string MINUS_CARD = "MinusHand";
     public const string POP_CARD = "PopCard";
-    public const string PLAY_CARD = "PlayCard";
+    public const string SET_FLOOR_CARD = "SetFloorCard";
+    public const string PLAY_NEXT = "PlayNext";
+
 }

@@ -20,10 +20,11 @@ public class FloorController : MonoBehaviour
     void Start()
     {
         deck = new List<GameObject>();
-        EventManager.AddListner(Constants.POP_CARD, PopCard);
-        EventManager.AddListner(Constants.PLAY_CARD, SetFloorCard);
+        EventManager.AddListener(Constants.POP_CARD, PopCard);
+        EventManager.AddListener(Constants.SET_FLOOR_CARD, SetFloorCard);
     }
     private void OnDestroy() {
+        EventManager.RemoveListener(Constants.SET_FLOOR_CARD, SetFloorCard);
         EventManager.RemoveListener(Constants.POP_CARD, PopCard);
     }
     //Start 버튼으로 호출.
@@ -90,15 +91,18 @@ public class FloorController : MonoBehaviour
     public void SetFloorCard(params object[] param)
     {
         CardClass data = param[0] as CardClass;
+        bool isPlaying = (bool)param[1];
         int month = data.month;
-        if (month < 0)
-        {
-            month = preMonth;
-        }
+        if (month < 0) month = preMonth;
         else preMonth = month;
-        // floorCards[month][floorActive[month]].SetActive(true);
         floorCards[month][floorActive[month]].SetFloor(data);
         floorActive[month]++;
+        if(isPlaying || data.month < 0){
+            StartCoroutine(PlayNext());
+        }
     }
-
+    IEnumerator PlayNext(){
+        yield return new WaitForSeconds(0.5f);
+            EventManager.CallEvent(Constants.PLAY_NEXT);
+    }
 }

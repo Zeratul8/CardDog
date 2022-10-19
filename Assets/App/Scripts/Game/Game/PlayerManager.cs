@@ -7,8 +7,10 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     #region Constants and Fields
     public CardScript[] myCards;
     public CardScript[] otherCards;
-    int myHand = 0;
+    int deckStack = 0;
+    int myHand;
     List<int> intList;
+    List<CardClass> deckList;
     List<CardClass> basicDeck;
     WaitForSeconds waitSeconds = new WaitForSeconds(0.2f);
     List<CardClass> deck = new List<CardClass>();
@@ -60,21 +62,20 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     void StartGame(params object[] param)
     {
-        List<CardClass> list = (List<CardClass>)param[0];
+        deckList = (List<CardClass>)param[0];
         bool isFirst = (bool)param[1];
-        StartCoroutine(ShareCard(list, isFirst));
+        StartCoroutine(ShareCard(deckList, isFirst));
     }
     IEnumerator ShareCard(List<CardClass> list, bool isFirst)
     {
         //카드 깔기.
         Debug.Log(list.Count);
         const int floorCard = 4;
-        int myCard = 0;
         //바닥에 패깔기 반복문
         for (int i = 0; i < floorCard; i++)
         {
             EventManager.CallEvent(Constants.POP_CARD);
-            EventManager.CallEvent(Constants.PLAY_CARD, list[myCard++]);
+            EventManager.CallEvent(Constants.SET_FLOOR_CARD, list[deckStack++], false);
             yield return waitSeconds;
         }
         //내 카드 받기
@@ -82,28 +83,28 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         {
             EventManager.CallEvent(Constants.POP_CARD);
             // Debug.Log(myCard);
-            myCards[i].SetHand(list[myCard++], true);
+            myCards[i].SetHand(list[deckStack++], true);
             yield return waitSeconds;
         }
         //상대 카드 주기
         for (int i = 0; i < 5; i++)
         {
             EventManager.CallEvent(Constants.POP_CARD);
-            otherCards[i].SetHand(list[myCard++], false);
+            otherCards[i].SetHand(list[deckStack++], false);
             yield return waitSeconds;
         }
         //바닥에 패깔기 반복문
         for (int i = 0; i < floorCard; i++)
         {
             EventManager.CallEvent(Constants.POP_CARD);
-            EventManager.CallEvent(Constants.PLAY_CARD, list[myCard++]);
+            EventManager.CallEvent(Constants.SET_FLOOR_CARD, list[deckStack++], false);
             yield return waitSeconds;
         }
         //상대 카드 주기
         for (int i = 5; i < 10; i++)
         {
             EventManager.CallEvent(Constants.POP_CARD);
-            otherCards[i].SetHand(list[myCard++], false);
+            otherCards[i].SetHand(list[deckStack++], false);
             yield return waitSeconds;
         }
         //내 카드 받기
@@ -112,14 +113,14 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             EventManager.CallEvent(Constants.POP_CARD);
             Debug.Log("PopCard");
             // Debug.Log(myCard);
-            myCards[i].SetHand(list[myCard++], true);
+            myCards[i].SetHand(list[deckStack++], true);
             yield return waitSeconds;
         }
         StartCoroutine(CheckCard());
     }
     IEnumerator CheckCard()
     {
-        yield return new WaitWhile(() => myHand != 0);
+        yield return new WaitWhile(() => deckStack != 0);
         EventManager.CallEvent(Constants.FINISH_GAME);
     }
     void PlusHand(object[] param)
@@ -130,7 +131,10 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         myHand--;
     }
-
+    void PlayNextCard(object[] param){
+        EventManager.CallEvent(Constants.POP_CARD);
+        EventManager.CallEvent(Constants.SET_FLOOR_CARD, deckList[deckStack++], false);
+    }
     void SetDeck()
     {
         for (int i = 0; i < 50; i++)
@@ -203,9 +207,11 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     #region Unity Methods
     protected override void OnAwake()
     {
-        EventManager.AddListner(Constants.START_GAME, ClickStartButton);
-        EventManager.AddListner(Constants.PLUS_HAND, PlusHand);
-        EventManager.AddListner(Constants.MINUS_CARD, MinusHand);
+        EventManager.AddListener(Constants.START_GAME, ClickStartButton);
+        EventManager.AddListener(Constants.PLUS_HAND, PlusHand);
+        EventManager.AddListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
+
         intList = new List<int>();
         for (int i = 0; i < 50; i++)
         {
@@ -221,6 +227,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         EventManager.RemoveListener(Constants.START_GAME, ClickStartButton);
         EventManager.RemoveListener(Constants.PLUS_HAND, PlusHand);
         EventManager.RemoveListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.RemoveListener(Constants.PLAY_NEXT, PlayNextCard);
 
     }
     #endregion

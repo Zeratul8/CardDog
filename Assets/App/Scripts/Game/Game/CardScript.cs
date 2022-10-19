@@ -39,7 +39,7 @@ public class CardScript : MonoBehaviour
         
         gameObject.SetActive(false);
         minusCard();
-        EventManager.CallEvent(Constants.PLAY_CARD, myCardData);
+        EventManager.CallEvent(Constants.SET_FLOOR_CARD, myCardData, true);
     }
     void minusCard()
     {
