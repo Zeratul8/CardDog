@@ -13,17 +13,24 @@ public class CardScript : MonoBehaviour
     {
         gameObject.SetActive(false);
         button = GetComponent<Button>();
-        button.onClick.AddListener(OnClick);
+        if(button!=null)button.onClick.AddListener(OnClick);
         image = GetComponent<Image>();
         gameUI = GetComponentInParent<GameUI>();
     }
-    public void InitCard(CardClass cardClass)
+    public void SetHand(CardClass cardClass, bool isMine)
     {
         gameObject.SetActive(true);
-        myCardData = cardClass;
-        
+        if (isMine)
+        {
+            image.sprite = gameUI.sprites[cardClass.index];
+            EventManager.CallEvent(Constants.PLUS_HAND);
+            myCardData = cardClass;
+        }
+    }
+    public void SetFloor(CardClass cardClass){
+        gameObject.SetActive(true);
         image.sprite = gameUI.sprites[cardClass.index];
-        EventManager.CallEvent(Constants.ADD_HAND);
+        myCardData = cardClass;
     }
     void OnClick()
     {
@@ -31,10 +38,11 @@ public class CardScript : MonoBehaviour
         Debug.Log(myCardData.month.ToString());
         
         gameObject.SetActive(false);
-        PutCard();
+        minusCard();
+        EventManager.CallEvent(Constants.PLAY_CARD, myCardData);
     }
-    void PutCard()
+    void minusCard()
     {
-        EventManager.CallEvent(Constants.PUT_CARD);
+        EventManager.CallEvent(Constants.MINUS_CARD);
     }
 }
