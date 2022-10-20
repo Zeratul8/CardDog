@@ -1,30 +1,77 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 {
-    #region Constants and Fields
+    public enum PlayState{
+        Wating, //시작 전
+        InitGame, //패 나누는 중
+        MyTurn, // 내 턴
+        OtherTurn, // 상대 턴
+        FinishGame, // 게임 종료 시
+    }
+    #region Public Constants and Fields
     public CardScript[] myCards;
     public CardScript[] otherCards;
+    public bool isMyTurn = false;
+    public PlayState playState = PlayState.Wating;
+    public TextMeshProUGUI text;
+    #endregion
+
+
+    #region Private Constants and Fields
+
     int deckStack = 0;
-    int myHand;
+    int myHand = 0;
     List<int> intList;
     List<CardClass> deckList;
     List<CardClass> basicDeck;
     WaitForSeconds waitSeconds = new WaitForSeconds(0.2f);
     List<CardClass> deck = new List<CardClass>();
-
     List<int> SPArr = new List<int>() { 4, 12, 16, 20, 24, 29, 32, 36, 41 };
     List<int> Light = new List<int>() { 0, 8, 28, 40, 44 };
     List<int> Blue = new List<int>() { 21, 33, 37 };
     List<int> Red = new List<int>() { 1, 5, 9 };
     List<int> Grass = new List<int>() { 13, 17, 25 };
     List<int> Bird = new List<int>() { 4, 12, 29 };
-
+    CardClass[] myCardArr = new CardClass[10];
     #endregion
 
     #region Properties
+    #endregion
+
+    #region Unity Methods
+    protected override void OnAwake()
+    {
+        EventManager.AddListener(Constants.START_GAME, ClickStartButton);
+        EventManager.AddListener(Constants.PLUS_HAND, PlusHand);
+        EventManager.AddListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
+
+        intList = new List<int>();
+        for (int i = 0; i < 50; i++)
+        {
+            intList.Add(i);
+        }
+
+        basicDeck = new List<CardClass>();
+        SetDeck();
+
+    }
+    private void OnDestroy()
+    {
+        EventManager.RemoveListener(Constants.START_GAME, ClickStartButton);
+        EventManager.RemoveListener(Constants.PLUS_HAND, PlusHand);
+        EventManager.RemoveListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.RemoveListener(Constants.PLAY_NEXT, PlayNextCard);
+
+    }
+    private void Update() {
+        text.text = myHand.ToString();
+    }
     #endregion
 
     #region Public Methods
@@ -60,16 +107,18 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         return deck;
     }
+    // 게임 시작.
     void StartGame(params object[] param)
     {
+        playState = PlayState.InitGame;
         deckList = (List<CardClass>)param[0];
         bool isFirst = (bool)param[1];
         StartCoroutine(ShareCard(deckList, isFirst));
     }
     IEnumerator ShareCard(List<CardClass> list, bool isFirst)
     {
-        //카드 깔기.
-        Debug.Log(list.Count);
+        //카드 깔기
+        deckStack = 0;
         const int floorCard = 4;
         //바닥에 패깔기 반복문
         for (int i = 0; i < floorCard; i++)
@@ -83,7 +132,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         {
             EventManager.CallEvent(Constants.POP_CARD);
             // Debug.Log(myCard);
-            myCards[i].SetHand(list[deckStack++], true);
+            EventManager.CallEvent(Constants.PLUS_HAND);
             yield return waitSeconds;
         }
         //상대 카드 주기
@@ -100,6 +149,15 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             EventManager.CallEvent(Constants.SET_FLOOR_CARD, list[deckStack++], false);
             yield return waitSeconds;
         }
+        //내 카드 받기
+        for (int i = 5; i < 10; i++)
+        {
+            EventManager.CallEvent(Constants.PLUS_HAND);
+            EventManager.CallEvent(Constants.POP_CARD);
+            // Debug.Log(myCard);
+            // myCards[i].SetHand(list[deckStack++], true);
+            yield return waitSeconds;
+        }
         //상대 카드 주기
         for (int i = 5; i < 10; i++)
         {
@@ -107,29 +165,53 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             otherCards[i].SetHand(list[deckStack++], false);
             yield return waitSeconds;
         }
-        //내 카드 받기
-        for (int i = 5; i < 10; i++)
-        {
-            EventManager.CallEvent(Constants.POP_CARD);
-            Debug.Log("PopCard");
-            // Debug.Log(myCard);
-            myCards[i].SetHand(list[deckStack++], true);
-            yield return waitSeconds;
-        }
+        SortHand();
+        if(isFirst) StartTurn();
+        else EndTurn();
         StartCoroutine(CheckCard());
     }
     IEnumerator CheckCard()
     {
         yield return new WaitWhile(() => myHand != 0);
-        EventManager.CallEvent(Constants.FINISH_GAME);
+        EventManager.CallEvent(Constants.ZERO_HAND);
+    }
+    void StartTurn()
+    {
+        playState = PlayState.MyTurn;
+        isMyTurn = true;
+    }
+    void EndTurn()
+    {
+        playState = PlayState.OtherTurn;
+        isMyTurn = false;
     }
     void PlusHand(object[] param)
     {
-        myHand++;
+        myCardArr[myHand] = deckList[deckStack];
+        myCards[myHand++].SetHand(deckList[deckStack++], true);
+        if (param.Length > 0)
+        {
+            if ((bool)param[0]) SortHand();
+        }
+    }
+    void SortHand()
+    {
+        Dictionary<int, CardClass> indexDic = new Dictionary<int, CardClass>();
+        int[] indexArr = new int[10];
+        for (int i = 0; i < 10; i++)
+        {
+            indexArr[i] = myCardArr[i].index; 
+            indexDic.Add(myCardArr[i].index, myCardArr[i]);
+        }
+        System.Array.Sort(indexArr);
+        for(int i = 0 ; i < myCards.Length;i++){
+            myCards[i].SetHand(indexDic[indexArr[i]]);
+        }
     }
     void MinusHand(object[] param)
     {
         myHand--;
+        // isMyTurn = false;
     }
     void PlayNextCard(object[] param){
         EventManager.CallEvent(Constants.POP_CARD);
@@ -204,31 +286,5 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     #endregion
 
-    #region Unity Methods
-    protected override void OnAwake()
-    {
-        EventManager.AddListener(Constants.START_GAME, ClickStartButton);
-        EventManager.AddListener(Constants.PLUS_HAND, PlusHand);
-        EventManager.AddListener(Constants.MINUS_CARD, MinusHand);
-        EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
-
-        intList = new List<int>();
-        for (int i = 0; i < 50; i++)
-        {
-            intList.Add(i);
-        }
-
-        basicDeck = new List<CardClass>();
-        SetDeck();
-
-    }
-    private void OnDestroy()
-    {
-        EventManager.RemoveListener(Constants.START_GAME, ClickStartButton);
-        EventManager.RemoveListener(Constants.PLUS_HAND, PlusHand);
-        EventManager.RemoveListener(Constants.MINUS_CARD, MinusHand);
-        EventManager.RemoveListener(Constants.PLAY_NEXT, PlayNextCard);
-
-    }
-    #endregion
+    
 }
