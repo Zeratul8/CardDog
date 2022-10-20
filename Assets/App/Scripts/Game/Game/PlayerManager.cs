@@ -120,7 +120,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     IEnumerator CheckCard()
     {
-        yield return new WaitWhile(() => deckStack != 0);
+        yield return new WaitWhile(() => myHand != 0);
         EventManager.CallEvent(Constants.FINISH_GAME);
     }
     void PlusHand(object[] param)

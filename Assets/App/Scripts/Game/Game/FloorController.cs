@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class FloorController : MonoBehaviour
 {
+    #region Constants and Fields
     public Transform deckParent;
     public GameObject deckObject;
     public Transform cardParent;
@@ -16,6 +17,12 @@ public class FloorController : MonoBehaviour
     // public Dictionary<>
     int index = 0;
     int preMonth;
+    #endregion
+
+    #region Properties
+    #endregion
+    
+#region Unity Methods
     // Start is called before the first frame update
     void Start()
     {
@@ -23,10 +30,14 @@ public class FloorController : MonoBehaviour
         EventManager.AddListener(Constants.POP_CARD, PopCard);
         EventManager.AddListener(Constants.SET_FLOOR_CARD, SetFloorCard);
     }
-    private void OnDestroy() {
+    private void OnDestroy()
+    {
         EventManager.RemoveListener(Constants.SET_FLOOR_CARD, SetFloorCard);
         EventManager.RemoveListener(Constants.POP_CARD, PopCard);
     }
+    #endregion
+
+    #region Public Methods
     //Start 버튼으로 호출.
     public void StartEvent()
     {
@@ -58,11 +69,19 @@ public class FloorController : MonoBehaviour
     {
         if (index >= 0)
         {
-        Debug.Log("Pop");
+            Debug.Log("Pop");
             deck[index].SetActive(false);
             index--;
         }
     }
+    #endregion
+
+
+    
+
+
+    #region Methods
+    
     void InitFloorCard()
     {
         if (floorCards == null)
@@ -97,12 +116,18 @@ public class FloorController : MonoBehaviour
         else preMonth = month;
         floorCards[month][floorActive[month]].SetFloor(data);
         floorActive[month]++;
-        if(isPlaying || data.month < 0){
+        if (isPlaying || data.month < 0)
+        {
             StartCoroutine(PlayNext());
         }
     }
-    IEnumerator PlayNext(){
+    IEnumerator PlayNext()
+    {
         yield return new WaitForSeconds(0.5f);
-            EventManager.CallEvent(Constants.PLAY_NEXT);
+        EventManager.CallEvent(Constants.PLAY_NEXT);
     }
+    #endregion
+
+
+
 }
