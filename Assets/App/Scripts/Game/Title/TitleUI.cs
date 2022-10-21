@@ -13,11 +13,11 @@ public class TitleUI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        EventManager.AddListner(START, LogIn);
+        EventManager.AddListener(START, LogIn);
         BtStart.onClick.AddListener(()=>{
             EventManager.CallEvent(START);
         });
-        EventManager.AddListner(QUIT, QuitGame);
+        EventManager.AddListener(QUIT, QuitGame);
         BtQuit.onClick.AddListener(()=>{
             EventManager.CallEvent(QUIT);
         });

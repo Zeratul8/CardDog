@@ -8,7 +8,7 @@ public static class EventManager
     public delegate void OnEvent(params object[] param);
     
     static Dictionary<string, List<OnEvent>> eventDic = new Dictionary<string, List<OnEvent>>();
-    public static void AddListner(string key, OnEvent callback){
+    public static void AddListener(string key, OnEvent callback){
         if(string.IsNullOrEmpty(key)){
             Debug.Log("Key를 다시 확인해주세요.");
             return;
