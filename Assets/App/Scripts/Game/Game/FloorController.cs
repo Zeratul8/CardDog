@@ -119,7 +119,7 @@ public class FloorController : MonoBehaviour
         int month = data.month;
         if (month < 0) month = preMonth;
         else preMonth = month;
-
+    
 
         floorCards[month][floorActive[month]].SetFloor(data);
         floorActive[month]++;
