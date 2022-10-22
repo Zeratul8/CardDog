@@ -59,7 +59,6 @@ public class CardScript : MonoBehaviour
     {
         if (PlayerManager.Instance.isMyTurn)
         {
-
             gameObject.SetActive(false);
             minusCard();
             EventManager.CallEvent(Constants.SET_FLOOR_CARD, myCardData, true);
