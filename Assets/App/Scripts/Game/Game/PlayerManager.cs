@@ -48,7 +48,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         EventManager.AddListener(Constants.START_GAME, ClickStartButton);
         EventManager.AddListener(Constants.PLUS_HAND, PlusHand);
-        EventManager.AddListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.AddListener(Constants.MINUS_HAND, MinusHand);
         EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
 
         intList = new List<int>();
@@ -65,7 +65,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         EventManager.RemoveListener(Constants.START_GAME, ClickStartButton);
         EventManager.RemoveListener(Constants.PLUS_HAND, PlusHand);
-        EventManager.RemoveListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.RemoveListener(Constants.MINUS_HAND, MinusHand);
         EventManager.RemoveListener(Constants.PLAY_NEXT, PlayNextCard);
 
     }
@@ -189,9 +189,9 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         if (param.Length > 0)
         {
-            if ((bool)param[0]) SortHand();
+            CardScript cs = param[0] as CardScript;
             Debug.Log("isJoker");
-            myCards[9].SetHand(deckList[deckStack++], true);
+            cs.SetHand(deckList[deckStack++], true);
             myHand++;
             return;
         }

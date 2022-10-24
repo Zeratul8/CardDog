@@ -59,14 +59,24 @@ public class CardScript : MonoBehaviour
     {
         if (PlayerManager.Instance.isMyTurn)
         {
-            gameObject.SetActive(false);
-            minusCard();
-            EventManager.CallEvent(Constants.SET_FLOOR_CARD, myCardData, true);
+            if (myCardData.month < 0)
+            {
+                // 점수 자리로 들어가기.
+                // 새카드 주기.
+                EventManager.CallEvent(Constants.MINUS_HAND);
+                EventManager.CallEvent(Constants.PLUS_HAND, this);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+                minusCard();
+                EventManager.CallEvent(Constants.SET_FLOOR_CARD, myCardData, true);
+            }
         }
     }
     void minusCard()
     {
-        EventManager.CallEvent(Constants.MINUS_CARD);
+        EventManager.CallEvent(Constants.MINUS_HAND);
     }
     void FinishGame(params object[] param){
         gameObject.SetActive(false);
