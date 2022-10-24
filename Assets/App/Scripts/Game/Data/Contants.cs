@@ -19,5 +19,4 @@ public static class Constants
     public const string SET_FLOOR_CARD = "SetFloorCard";
     public const string PLAY_NEXT = "PlayNext";
     public const string ZERO_HAND = "ZeroHand";
-
 }

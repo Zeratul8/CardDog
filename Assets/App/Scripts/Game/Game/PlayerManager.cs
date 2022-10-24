@@ -165,6 +165,9 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             otherCards[i].SetHand(list[deckStack++], false);
             yield return waitSeconds;
         }
+        
+        myCards[9].SetJoker(); //테스트용 조커바꿔치기
+
         SortHand();
         if(isFirst) StartTurn();
         else EndTurn();
@@ -187,19 +190,19 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     void PlusHand(object[] param)
     {
-        if (param.Length > 0)
+        /*if (param.Length > 0)
         {
             if ((bool)param[0]) SortHand();
             Debug.Log("isJoker");
             myCards[9].SetHand(deckList[deckStack++], true);
             myHand++;
             return;
-        }
-        Debug.Log("not Joker");
+        }*/
+        
         myCardArr[myHand] = deckList[deckStack];
         myCards[myHand++].SetHand(deckList[deckStack++], true);
     }
-    void SortHand()
+    public void SortHand()
     {
         Dictionary<int, CardClass> indexDic = new Dictionary<int, CardClass>();
         int[] indexArr = new int[10];

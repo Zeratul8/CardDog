@@ -26,7 +26,7 @@ public class FloorController : MonoBehaviour
     #region Properties
     #endregion
 
-#region Unity Methods
+    #region Unity Methods
     // Start is called before the first frame update
     void Start()
     {
@@ -123,12 +123,12 @@ public class FloorController : MonoBehaviour
 
         floorCards[month][floorActive[month]].SetFloor(data);
         floorActive[month]++;
-        if(isPlaying && data.month < 0){
+        /*if(isPlaying && data.month < 0){
             // 내 점수 판으로 들어오기.
             // 새 카드 주기.
             EventManager.CallEvent(Constants.PLUS_HAND, true);
-        }
-        else if (isPlaying || data.month < 0)
+        }*/
+        if (isPlaying || data.month < 0)
         {
             StartCoroutine(PlayNext());
         }
