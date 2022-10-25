@@ -91,14 +91,25 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     List<CardClass> Shuffle()
     {
-        for (int i = 0; i < intList.Count; i++)
+        // int count = intList.Count;
+        int count = 48;
+        for (int i = 0; i < count; i++)
         {
-            int r = Random.Range(0, intList.Count);
+            int r = Random.Range(0, count);
             int j = intList[i];
             intList[i] = intList[r];
             intList[r] = j;
         }
+        {
+            int tmp = intList[21];
+            intList[21] = intList[48];
+            intList[48] = tmp;
 
+            tmp = intList[22];
+            intList[22] = intList[49];
+            intList[49] = tmp;
+        }
+        
         // deck.Clear();
         for (int i = 0; i < intList.Count; i++)
         {
@@ -191,8 +202,9 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         {
             CardScript cs = param[0] as CardScript;
             Debug.Log("isJoker");
+            EventManager.CallEvent(Constants.POP_CARD);
             cs.SetHand(deckList[deckStack++], true);
-            myHand++;
+            // myHand++;
             return;
         }
         Debug.Log("not Joker");

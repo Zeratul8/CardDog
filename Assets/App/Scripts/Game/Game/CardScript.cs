@@ -55,6 +55,17 @@ public class CardScript : MonoBehaviour
             myCardData = cardClass;
         }
     }
+    public CardClass RemoveCard(){
+        Debug.Log(myCardData.month);
+        Debug.Log(myCardData.index);
+        gameObject.SetActive(false);
+        return myCardData;
+    }
+    public void SetScore(CardClass cardClass){
+        gameObject.SetActive(true);
+        image.sprite = gameUI.sprites[cardClass.index];
+        myCardData = cardClass;
+    }
     void OnClick()
     {
         if (PlayerManager.Instance.isMyTurn)
@@ -63,7 +74,7 @@ public class CardScript : MonoBehaviour
             {
                 // 점수 자리로 들어가기.
                 // 새카드 주기.
-                EventManager.CallEvent(Constants.MINUS_HAND);
+                // EventManager.CallEvent(Constants.MINUS_HAND);
                 EventManager.CallEvent(Constants.PLUS_HAND, this);
             }
             else
