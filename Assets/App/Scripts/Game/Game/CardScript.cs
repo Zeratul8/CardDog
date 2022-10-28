@@ -56,8 +56,8 @@ public class CardScript : MonoBehaviour
         }
     }
     public CardClass RemoveCard(){
-        Debug.Log(myCardData.month);
-        Debug.Log(myCardData.index);
+        // Debug.Log(myCardData.month);
+        // Debug.Log(myCardData.index);
         gameObject.SetActive(false);
         return myCardData;
     }
