@@ -48,7 +48,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         EventManager.AddListener(Constants.START_GAME, ClickStartButton);
         EventManager.AddListener(Constants.PLUS_HAND, PlusHand);
-        EventManager.AddListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.AddListener(Constants.MINUS_HAND, MinusHand);
         EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
 
         intList = new List<int>();
@@ -65,7 +65,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         EventManager.RemoveListener(Constants.START_GAME, ClickStartButton);
         EventManager.RemoveListener(Constants.PLUS_HAND, PlusHand);
-        EventManager.RemoveListener(Constants.MINUS_CARD, MinusHand);
+        EventManager.RemoveListener(Constants.MINUS_HAND, MinusHand);
         EventManager.RemoveListener(Constants.PLAY_NEXT, PlayNextCard);
 
     }
@@ -91,14 +91,25 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     List<CardClass> Shuffle()
     {
-        for (int i = 0; i < intList.Count; i++)
+        // int count = intList.Count;
+        int count = 48;
+        for (int i = 0; i < count; i++)
         {
-            int r = Random.Range(0, intList.Count);
+            int r = Random.Range(0, count);
             int j = intList[i];
             intList[i] = intList[r];
             intList[r] = j;
         }
+        {
+            int tmp = intList[21];
+            intList[21] = intList[48];
+            intList[48] = tmp;
 
+            tmp = intList[22];
+            intList[22] = intList[49];
+            intList[49] = tmp;
+        }
+        
         // deck.Clear();
         for (int i = 0; i < intList.Count; i++)
         {
@@ -165,9 +176,6 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             otherCards[i].SetHand(list[deckStack++], false);
             yield return waitSeconds;
         }
-        
-        myCards[9].SetJoker(); //테스트용 조커바꿔치기
-
         SortHand();
         if(isFirst) StartTurn();
         else EndTurn();
@@ -190,19 +198,20 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     void PlusHand(object[] param)
     {
-        /*if (param.Length > 0)
+        if (param.Length > 0)
         {
-            if ((bool)param[0]) SortHand();
+            CardScript cs = param[0] as CardScript;
             Debug.Log("isJoker");
-            myCards[9].SetHand(deckList[deckStack++], true);
-            myHand++;
+            EventManager.CallEvent(Constants.POP_CARD);
+            cs.SetHand(deckList[deckStack++], true);
+            // myHand++;
             return;
-        }*/
-        
+        }
+        Debug.Log("not Joker");
         myCardArr[myHand] = deckList[deckStack];
         myCards[myHand++].SetHand(deckList[deckStack++], true);
     }
-    public void SortHand()
+    void SortHand()
     {
         Dictionary<int, CardClass> indexDic = new Dictionary<int, CardClass>();
         int[] indexArr = new int[10];

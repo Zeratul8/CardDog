@@ -7,7 +7,7 @@ public class CardScript : MonoBehaviour
 {
     #region Constants and Fields
     Button button = null;
-    public CardClass myCardData;
+    CardClass myCardData;
     Image image;
     GameUI gameUI;
     #endregion
@@ -31,16 +31,7 @@ public class CardScript : MonoBehaviour
     #endregion
 
     #region Public Methods
-    //ÆÄ´óÀÌ ÇÊ»ì±â Åº ¹Ù²ãÄ¡±â!
-    public void SetJoker()
-    {
-        image.sprite = gameUI.sprites[49];
-        myCardData.index = 49;
-        myCardData.month = -1;
-        myCardData.sCard = SPECIAL_CARD.NORMAL;
-        myCardData.type = CARD_TYPE.JOKER;
-    }
-    
+     
     public void SetFloor(CardClass cardClass){
         gameObject.SetActive(true);
         image.sprite = gameUI.sprites[cardClass.index];
@@ -63,6 +54,17 @@ public class CardScript : MonoBehaviour
             image.sprite = gameUI.sprites[cardClass.index];
             myCardData = cardClass;
         }
+    }
+    public CardClass RemoveCard(){
+        // Debug.Log(myCardData.month);
+        // Debug.Log(myCardData.index);
+        gameObject.SetActive(false);
+        return myCardData;
+    }
+    public void SetScore(CardClass cardClass){
+        gameObject.SetActive(true);
+        image.sprite = gameUI.sprites[cardClass.index];
+        myCardData = cardClass;
     }
     void OnClick()
     {
@@ -87,7 +89,7 @@ public class CardScript : MonoBehaviour
     }
     void minusCard()
     {
-        EventManager.CallEvent(Constants.MINUS_CARD);
+        EventManager.CallEvent(Constants.MINUS_HAND);
     }
     void FinishGame(params object[] param){
         gameObject.SetActive(false);
