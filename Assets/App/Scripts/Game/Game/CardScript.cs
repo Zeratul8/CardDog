@@ -69,10 +69,9 @@ public class CardScript : MonoBehaviour
         if (PlayerManager.Instance.isMyTurn)
         {
             Debug.Log(myCardData.index);
-            if (myCardData.index > 48)
+            if (myCardData.index > 47)
             {
-                
-                gameObject.SetActive(false);
+                //gameObject.SetActive(false);
                 minusCard();    //점수판으로 보내야함
                 EventManager.CallEvent(Constants.POP_CARD);
                 EventManager.CallEvent(Constants.PLUS_HAND);

@@ -27,6 +27,16 @@ public class PlayFabTest : MonoBehaviour
         var request = new RegisterPlayFabUserRequest { Email = m_id.text, Password = m_password.text, Username = m_userName.text };
         PlayFabClientAPI.RegisterPlayFabUser(request, OnRegisterSuccess, OnRegisterFailure);
     }
+    public void GoldPlusBtn()
+    {
+        var request = new AddUserVirtualCurrencyRequest() { VirtualCurrency = "BD", Amount = 1000000 };
+        PlayFabClientAPI.AddUserVirtualCurrency(request, (result) => Debug.Log("µ·¾ò±â ¼º°ø! ÇöÀç µ· :" + result.Balance), (error) => Debug.Log("µ·¾ò±â ½ÇÆÐ!"));
+    }
+    public void GoldMinusBtn()
+    {
+        var request = new SubtractUserVirtualCurrencyRequest() { VirtualCurrency = "BD", Amount = 100000 };
+        PlayFabClientAPI.SubtractUserVirtualCurrency(request, (result) => Debug.Log("µ· ¼Ò¸ð ¼º°ø! ÇöÀç µ· :" + result.Balance), (error) => Debug.Log("µ·¼Ò¸ð ½ÇÆÐ!"));
+    }
     #endregion
 
 
