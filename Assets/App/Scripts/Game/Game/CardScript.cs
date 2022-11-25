@@ -74,10 +74,10 @@ public class CardScript : MonoBehaviour
             if (myCardData.index > 47)
             {
                 //gameObject.SetActive(false);
-                minusCard();    //점수판으로 보내야함
+                minusCard();    //?????????? ????????
                 EventManager.CallEvent(Constants.POP_CARD);
-                EventManager.CallEvent(Constants.PLUS_HAND);
-                PlayerManager.Instance.SortHand();
+                EventManager.CallEvent(Constants.PLUS_HAND, this);
+                // PlayerManager.Instance.SortHand();
             }
             else
             {

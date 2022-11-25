@@ -51,7 +51,7 @@ public class FloorController : MonoBehaviour
     #endregion
 
     #region Public Methods
-    //Start ë²„íŠ¼ìœ¼ë¡œ í˜¸ì¶œ.
+    //Start ¹öÆ°À¸·Î È£Ãâ.
     public void StartEvent()
     {
         if (deck.Count == 0)
@@ -173,7 +173,7 @@ public class FloorController : MonoBehaviour
             switch (floorActive[card.month] - jokerQueue.Count)
             {
                 case 1:
-                    Debug.Log("íŒ¨ í•œìž¥");
+                    Debug.Log("ÆÐ ÇÑÀå");
                     break;
                 case 2:
                     for (int i = 0; i < floorActive[card.month]; i++)
@@ -183,32 +183,32 @@ public class FloorController : MonoBehaviour
                     }
                     floorActive[card.month] = 0;
                     if(isSameMonth){
-                         Debug.Log("ìª½");
+                         Debug.Log("ÂÊ");
                          GetOtherCard();
                          }
-                    Debug.Log("ì¹´ë“œ ë¨¹ê¸°");
+                    Debug.Log("Ä«µå ¸Ô±â");
                     break;
                 case 3:
                     if (isSameMonth)
                     {
-                        Debug.Log("ë»‘");
+                        Debug.Log("»¶");
                     }
                     else
                     {
                         yield return StartCoroutine(SelectCard(card.month));
                         cc = floorCards[card.month][2].RemoveCard();
                         ScoreManager.Instance.AddPoint(cc);
-                        Debug.Log("í•œìž¥ ê³ ë¥´ê¸°");
+                        Debug.Log("ÇÑÀå °í¸£±â");
                     }
                     break;
                 case 4:
                     if (isSameMonth)
                     {
-                        Debug.Log("ë”°ë‹¥");
+                        Debug.Log("µû´Ú");
                     }
                     else
                     {
-                        Debug.Log("ë»‘ ë¨¹ê¸°.");
+                        Debug.Log("»¶ ¸Ô±â.");
                         GetOtherCard();
                         for (int i = 0; i < floorActive[card.month]; i++)
                         {
@@ -222,7 +222,7 @@ public class FloorController : MonoBehaviour
         }
     }
     void GetOtherCard(){
-        Debug.Log("í”¼ëºì–´ì˜¤ê¸°.");
+        Debug.Log("ÇÇ»¯¾î¿À±â.");
     }
     IEnumerator SelectCard(int month){
         int select = Random.Range(0,2);
