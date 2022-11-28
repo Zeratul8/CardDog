@@ -31,7 +31,9 @@ public class CardScript : MonoBehaviour
     #endregion
 
     #region Public Methods
-     
+    public CardClass GetCardClass(){
+        return myCardData;
+    }
     public void SetFloor(CardClass cardClass){
         gameObject.SetActive(true);
         image.sprite = gameUI.sprites[cardClass.index];
@@ -75,7 +77,7 @@ public class CardScript : MonoBehaviour
             {
                 //gameObject.SetActive(false);
                 minusCard();    //?????????? ????????
-                EventManager.CallEvent(Constants.POP_CARD);
+                // EventManager.CallEvent(Constants.POP_CARD);
                 EventManager.CallEvent(Constants.PLUS_HAND, this);
                 // PlayerManager.Instance.SortHand();
             }

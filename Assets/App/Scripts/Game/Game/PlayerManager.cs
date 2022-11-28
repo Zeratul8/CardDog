@@ -23,9 +23,12 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 
 
     #region Private Constants and Fields
-
+    const int HandMaxCount = 10;
+    const int DeckMaxCount = 50;
     int deckStack = 0;
     int myHand = 0;
+    GameObject[] myCardObject = new GameObject[HandMaxCount];
+    
     List<int> intList;
     List<CardClass> deckList;
     List<CardClass> basicDeck;
@@ -37,7 +40,6 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     List<int> Red = new List<int>() { 1, 5, 9 };
     List<int> Grass = new List<int>() { 13, 17, 25 };
     List<int> Bird = new List<int>() { 4, 12, 29 };
-    CardClass[] myCardArr = new CardClass[10];
     #endregion
 
     #region Properties
@@ -52,7 +54,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
 
         intList = new List<int>();
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < DeckMaxCount; i++)
         {
             intList.Add(i);
         }
@@ -92,6 +94,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     List<CardClass> Shuffle()
     {
         // int count = intList.Count;
+        // int count = DeckMaxCount;
         int count = 48;
         for (int i = 0; i < count; i++)
         {
@@ -204,25 +207,29 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             Debug.Log("isJoker");
             EventManager.CallEvent(Constants.POP_CARD);
             cs.SetHand(deckList[deckStack++], true);
+            SortHand();
             // myHand++;
             return;
         }
         Debug.Log("not Joker");
-        myCardArr[myHand] = deckList[deckStack];
-        myCards[myHand++].SetHand(deckList[deckStack++], true);
+        
+        myCards[myHand].SetHand(deckList[deckStack++], true);
+        myCardObject[myHand] = myCards[myHand].gameObject;
+        myHand++;
     }
     void SortHand()
     {
-        Dictionary<int, CardClass> indexDic = new Dictionary<int, CardClass>();
-        int[] indexArr = new int[10];
-        for (int i = 0; i < 10; i++)
+        Dictionary<int, Vector3> indexDic = new Dictionary<int, Vector3>();
+        int[] indexArr = new int[HandMaxCount];
+        for (int i = 0; i < HandMaxCount; i++)
         {
-            indexArr[i] = myCardArr[i].index; 
-            indexDic.Add(myCardArr[i].index, myCardArr[i]);
+            int index = myCards[i].GetCardClass().index;
+            indexArr[i] =  index;
+            indexDic.Add(index, myCardObject[i].transform.position);
         }
         System.Array.Sort(indexArr);
         for(int i = 0 ; i < myCards.Length;i++){
-            myCards[i].SetHand(indexDic[indexArr[i]]);
+            myCardObject[i].transform.position = indexDic[indexArr[i]];
         }
     }
     void MinusHand(object[] param)
@@ -236,7 +243,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     void SetDeck()
     {
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < DeckMaxCount; i++)
         {
             CARD_TYPE cType = CARD_TYPE.NORMAL;
             SPECIAL_CARD sCard = SPECIAL_CARD.NORMAL;
