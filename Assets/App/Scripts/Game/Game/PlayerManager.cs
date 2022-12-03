@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 {
@@ -208,7 +209,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             EventManager.CallEvent(Constants.POP_CARD);
             cs.SetHand(deckList[deckStack++], true);
             SortHand();
-            // myHand++;
+            myHand++;
             return;
         }
         Debug.Log("not Joker");
@@ -219,17 +220,15 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     void SortHand()
     {
-        Dictionary<int, Vector3> indexDic = new Dictionary<int, Vector3>();
-        int[] indexArr = new int[HandMaxCount];
+        Dictionary<int, Transform> indexDic = new Dictionary<int, Transform>();
         for (int i = 0; i < HandMaxCount; i++)
         {
             int index = myCards[i].GetCardClass().index;
-            indexArr[i] =  index;
-            indexDic.Add(index, myCardObject[i].transform.position);
+            indexDic.Add(index, myCardObject[i].transform);
         }
-        System.Array.Sort(indexArr);
-        for(int i = 0 ; i < myCards.Length;i++){
-            myCardObject[i].transform.position = indexDic[indexArr[i]];
+        indexDic = indexDic.OrderBy(item => item.Key).ToDictionary(x=>x.Key, x=>x.Value);
+        foreach(Transform tr in indexDic.Values){
+            tr.SetAsLastSibling();
         }
     }
     void MinusHand(object[] param)

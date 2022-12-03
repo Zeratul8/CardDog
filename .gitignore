@@ -61,3 +61,6 @@ crashlytics-build.properties
 
 Assets/Images/BlueDog/BDico.png.meta
 ProjectSettings/GvhProjectSettings.xml
+Assets/VSCode
+.vscode/launch.json
+Assets/VSCode.meta
