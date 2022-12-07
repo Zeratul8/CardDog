@@ -24,6 +24,7 @@ public class CardScript : MonoBehaviour
         image = GetComponent<Image>();
         gameUI = GetComponentInParent<GameUI>();
         EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
+        
     }
     private void OnDestroy() {
         EventManager.RemoveListener(Constants.FINISH_GAME, FinishGame);
@@ -63,7 +64,7 @@ public class CardScript : MonoBehaviour
         gameObject.SetActive(false);
         return myCardData;
     }
-    public void SetScore(CardClass cardClass){
+    public void SetCard(CardClass cardClass){
         gameObject.SetActive(true);
         image.sprite = gameUI.sprites[cardClass.index];
         myCardData = cardClass;
@@ -77,7 +78,8 @@ public class CardScript : MonoBehaviour
             {
                 //gameObject.SetActive(false);
                 minusCard();    //?????????? ????????
-                // EventManager.CallEvent(Constants.POP_CARD);
+                ScoreManager.Instance.AddPoint(myCardData);
+                EventManager.CallEvent(Constants.POP_CARD);
                 EventManager.CallEvent(Constants.PLUS_HAND, this);
                 // PlayerManager.Instance.SortHand();
             }

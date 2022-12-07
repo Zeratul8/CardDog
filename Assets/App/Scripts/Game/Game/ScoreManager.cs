@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
 {
@@ -13,40 +14,55 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     public Transform specialArea;
     public Transform lightArea;
     public Transform normalArea;
-    
 
-    List<CardScript> bandList;
-    List<CardScript> specialList;
-    List<CardScript> lightList;
-    List<CardScript> normalList;
-
-    Dictionary<CARD_TYPE, int> cardCount;
+    //Dictionary<CARD_TYPE, int> cardCount;
     Dictionary<CARD_TYPE, List<CardScript>> cardLists;
+    Dictionary<CARD_TYPE, ScoreClass> scoreDict;
+
+    ScoreClass band;   
+    ScoreClass special;   
+    ScoreClass lightCard;   
+    ScoreClass normal;   
+
+    class ScoreClass
+    {   
+        public ScoreClass(int _count, List<CardScript> _list, TextMeshProUGUI _text)
+        {
+            count = _count;
+            list = _list;
+            text = _text;
+        }
+        public int count;
+        public int score = 0;
+        public List<CardScript> list;
+        public TextMeshProUGUI text;
+    }
     protected override void OnStart()
     {
-        cardCount = new Dictionary<CARD_TYPE, int>();
+        //cardCount = new Dictionary<CARD_TYPE, int>();
         cardLists = new Dictionary<CARD_TYPE, List<CardScript>>();
+        scoreDict = new Dictionary<CARD_TYPE, ScoreClass>();
 
-        bandList = new List<CardScript>();
-        specialList = new List<CardScript>();
-        lightList = new List<CardScript>();
-        normalList = new List<CardScript>();
-
-        cardLists.Add(CARD_TYPE.NORMAL, normalList);
-        cardLists.Add(CARD_TYPE.LIGHT, lightList);
-        cardLists.Add(CARD_TYPE.BAND, bandList);
-        cardLists.Add(CARD_TYPE.SPECIAL, specialList);
-
-        cardCount.Add(CARD_TYPE.NORMAL , 0);
-        cardCount.Add(CARD_TYPE.LIGHT , 0);
-        cardCount.Add(CARD_TYPE.BAND, 0);
-        cardCount.Add(CARD_TYPE.SPECIAL , 0);
-
-        InitList(5, lightArea, lightList);
-        InitList(10, bandArea, bandList);
-        InitList(10, specialArea, specialList);
-        InitList(20, normalArea, normalList);
-
+        Initiate(10, CARD_TYPE.BAND, bandArea, band);
+        Initiate(10, CARD_TYPE.SPECIAL, specialArea, special);
+        Initiate(5, CARD_TYPE.LIGHT, lightArea, lightCard);
+        Initiate(25, CARD_TYPE.NORMAL, normalArea, normal);
+        EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
+    }
+    private void OnDestroy()
+    {
+        EventManager.RemoveListener(Constants.FINISH_GAME, FinishGame);
+    }
+    void Initiate(int count, CARD_TYPE type, Transform parent, ScoreClass scoreClass)
+    {
+        List<CardScript>  list = new List<CardScript>(count);
+        TextMeshProUGUI text = parent.GetComponentInChildren<TextMeshProUGUI>();
+        InitList(count, parent, list);
+        text.transform.SetAsLastSibling();
+        scoreClass = new ScoreClass(0, list, text);
+        scoreDict.Add(type, scoreClass);
+        cardLists.Add(type, list);
+        SetText(type);
     }
     void InitList(int count, Transform parent, List<CardScript> list){
         for(int i = 0 ; i< count;i++){
@@ -57,7 +73,40 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     }
     public void AddPoint(CardClass cardClass)
     {
-        cardLists[cardClass.type][cardCount[cardClass.type]++].SetScore(cardClass);
+        if (cardClass.type == CARD_TYPE.NORMAL)
+        {
+            cardLists[cardClass.type][scoreDict[cardClass.type].count++].SetCard(cardClass);
+            scoreDict[cardClass.type].score += cardClass.score;
+        }
+        else
+        {
+            cardLists[cardClass.type][scoreDict[cardClass.type].count++].SetCard(cardClass);
+            scoreDict[cardClass.type].score = scoreDict[cardClass.type].count;
+        }
+        SetText(cardClass.type);
+    }
+    void SetText(CARD_TYPE type)    
+    {
+        scoreDict[type].text.text = scoreDict[type].score > 0 ? scoreDict[type].score.ToString() : "" ;
+    }
+    void FinishGame(params object[] param)
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            CARD_TYPE ct = (CARD_TYPE)i;
+            scoreDict[ct].score = 0;
+            scoreDict[ct].text.text = "";
+            scoreDict[ct].count = 0;
+            for(int j = 0; j< scoreDict[ct].list.Count; j++)
+            {
+                if (scoreDict[ct].list[j].gameObject.activeInHierarchy)
+                {
+                    scoreDict[ct].list[j].RemoveCard();
+                }
+                else break;
+            }
+
+        }
         
     }
 }

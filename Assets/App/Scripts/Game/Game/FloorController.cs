@@ -16,6 +16,7 @@ public class FloorController : MonoBehaviour
     Queue<CardClass> playedCardQueue;
     Queue<CardClass> jokerQueue;
     public GameUI gameUI;
+    int jokerMonth = 0;
     const int deckCount = 50;
     const int monthCount = 12;
     const int cellCount = 6;
@@ -40,6 +41,7 @@ public class FloorController : MonoBehaviour
         EventManager.AddListener(Constants.SET_FLOOR_CARD, SetFloorCard);
         EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
         EventManager.AddListener(Constants.ZERO_HAND, ZeroHand);
+        EventManager.AddListener(Constants.READY_TO_PLAY, SetReady);
     }
     private void OnDestroy()
     {
@@ -47,6 +49,7 @@ public class FloorController : MonoBehaviour
         EventManager.RemoveListener(Constants.POP_CARD, PopCard);
         EventManager.RemoveListener(Constants.FINISH_GAME, FinishGame);
         EventManager.RemoveListener(Constants.ZERO_HAND, ZeroHand);
+        EventManager.RemoveListener(Constants.READY_TO_PLAY, SetReady);
     }
     #endregion
 
@@ -116,14 +119,18 @@ public class FloorController : MonoBehaviour
         }
         isFinish = false;
     }
-
+    
     public void SetFloorCard(params object[] param)
     {
-
         CardClass data = param[0] as CardClass;
         bool isPlaying = (bool)param[1];
         int month = data.month;
-        if (month < 0) month = preMonth;
+        
+        if (month < 0)
+        {
+            month = preMonth;
+            jokerMonth = month;
+        }
         else preMonth = month;
         switch (PlayerManager.Instance.playState)
         {
@@ -135,6 +142,12 @@ public class FloorController : MonoBehaviour
                     playedCardQueue.Enqueue(data);
                 }
                 break;
+            case PlayerManager.PlayState.InitGame:
+                if(data.month < 0)
+                {
+                    jokerQueue.Enqueue(data);
+                }
+                break;
         }
 
         floorCards[month][floorActive[month]].SetFloor(data);
@@ -144,7 +157,10 @@ public class FloorController : MonoBehaviour
             StartCoroutine(PlayNext());
         }
         else{
-            StartCoroutine(AddPoint());
+            if(PlayerManager.Instance.playState != PlayerManager.PlayState.InitGame)
+            {
+                StartCoroutine(AddPoint());
+            }
         }
     }
     public void FinishGame(params object[] param){
@@ -161,9 +177,33 @@ public class FloorController : MonoBehaviour
     {
         isFinish = true;
     }
+    void SetReady(params object[] param)
+    {
+        StartCoroutine(AddPoint());
+    }
     IEnumerator AddPoint(){
         yield return new WaitForSeconds(0.5f);
         Debug.Log(jokerQueue.Count);
+        while(jokerQueue.Count > 0)
+        {
+            CardClass card = jokerQueue.Dequeue();
+            for (int i = 0; i < floorActive[jokerMonth]; i++)
+            {
+                if (floorCards[jokerMonth][i].GetCardClass().Equals(card))
+                {
+                    card = floorCards[jokerMonth][i].RemoveCard();
+                    ScoreManager.Instance.AddPoint(card);
+                    for(int j = i + 1; j < floorActive[jokerMonth]; j++)
+                    {
+                        CardClass cardClass = floorCards[jokerMonth][j].RemoveCard();
+                        floorCards[jokerMonth][j - 1].SetCard(cardClass);
+                    }
+                }
+
+            }
+            floorActive[jokerMonth]--;
+
+        }
         CardClass cc;
         while (playedCardQueue.Count > 0)
         {
@@ -181,23 +221,26 @@ public class FloorController : MonoBehaviour
                         cc = floorCards[card.month][i].RemoveCard();
                         ScoreManager.Instance.AddPoint(cc);
                     }
+                    if (isSameMonth)
+                    {
+                        Debug.Log("ÂÊ");
+                        GetOtherCard();
+                    }
                     floorActive[card.month] = 0;
-                    if(isSameMonth){
-                         Debug.Log("ÂÊ");
-                         GetOtherCard();
-                         }
                     Debug.Log("Ä«µå ¸Ô±â");
                     break;
                 case 3:
                     if (isSameMonth)
                     {
                         Debug.Log("»¶");
+                        playedCardQueue.Clear();
                     }
                     else
                     {
                         yield return StartCoroutine(SelectCard(card.month));
                         cc = floorCards[card.month][2].RemoveCard();
                         ScoreManager.Instance.AddPoint(cc);
+                        floorActive[card.month] -= 2;
                         Debug.Log("ÇÑÀå °í¸£±â");
                     }
                     break;
@@ -209,13 +252,14 @@ public class FloorController : MonoBehaviour
                     else
                     {
                         Debug.Log("»¶ ¸Ô±â.");
-                        GetOtherCard();
-                        for (int i = 0; i < floorActive[card.month]; i++)
-                        {
-                            cc = floorCards[card.month][i].RemoveCard();
-                            ScoreManager.Instance.AddPoint(cc);
-                        }
                     }
+                    GetOtherCard();
+                    for (int i = 0; i < floorActive[card.month]; i++)
+                    {
+                        cc = floorCards[card.month][i].RemoveCard();
+                        ScoreManager.Instance.AddPoint(cc);
+                    }
+                    floorActive[card.month] = 0;
                     break;
             }
             if (isSameMonth) break;
@@ -225,6 +269,7 @@ public class FloorController : MonoBehaviour
         Debug.Log("ÇÇ»¯¾î¿À±â.");
     }
     IEnumerator SelectCard(int month){
+        //ÆË¾÷ ¶ç¿ö¼­ ¼±ÅÃÇÏ±â.
         int select = Random.Range(0,2);
         CardClass cc = floorCards[month][select].RemoveCard();
         ScoreManager.Instance.AddPoint(cc);

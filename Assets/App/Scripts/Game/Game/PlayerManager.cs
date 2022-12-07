@@ -19,7 +19,8 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     public CardScript[] otherCards;
     public bool isMyTurn = false;
     public PlayState playState = PlayState.Wating;
-    public TextMeshProUGUI text;
+    List<Transform> initTransform;
+
     #endregion
 
 
@@ -53,14 +54,20 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         EventManager.AddListener(Constants.PLUS_HAND, PlusHand);
         EventManager.AddListener(Constants.MINUS_HAND, MinusHand);
         EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
-
+        EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
         intList = new List<int>();
         for (int i = 0; i < DeckMaxCount; i++)
         {
             intList.Add(i);
         }
 
-        basicDeck = new List<CardClass>();
+        basicDeck = new List<CardClass>(DeckMaxCount);
+        initTransform = new List<Transform>(HandMaxCount);
+        for(int i = 0; i < HandMaxCount; i++)
+        {
+            myCardObject[i] = myCards[i].gameObject;
+            initTransform.Add(myCardObject[i].transform);
+        }
         SetDeck();
 
     }
@@ -70,10 +77,8 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         EventManager.RemoveListener(Constants.PLUS_HAND, PlusHand);
         EventManager.RemoveListener(Constants.MINUS_HAND, MinusHand);
         EventManager.RemoveListener(Constants.PLAY_NEXT, PlayNextCard);
+        EventManager.RemoveListener(Constants.FINISH_GAME, FinishGame);
 
-    }
-    private void Update() {
-        text.text = myHand.ToString();
     }
     #endregion
 
@@ -82,6 +87,13 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     #endregion
 
     #region Methods
+    void FinishGame(params object[] param)
+    {
+        for(int i = 0; i < initTransform.Count; i++)
+        {
+            initTransform[i].SetAsLastSibling();
+        }
+    }
     void ClickStartButton(params object[] param)
     {
         StartCoroutine(ShuffleCoroutine());
@@ -90,7 +102,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         //셔플 애니메이션 
         yield return new WaitForSeconds(2);
-        StartGame(Shuffle(), true);
+        StartGame(Shuffle(), false);
     }
     List<CardClass> Shuffle()
     {
@@ -105,12 +117,12 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             intList[r] = j;
         }
         {
-            int tmp = intList[21];
-            intList[21] = intList[48];
+            int tmp = intList[3];
+            intList[3] = intList[48];
             intList[48] = tmp;
 
-            tmp = intList[22];
-            intList[22] = intList[49];
+            tmp = intList[2];
+            intList[2] = intList[49];
             intList[49] = tmp;
         }
         
@@ -142,20 +154,39 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             EventManager.CallEvent(Constants.SET_FLOOR_CARD, list[deckStack++], false);
             yield return waitSeconds;
         }
-        //내 카드 받기
-        for (int i = 0; i < 5; i++)
+        if (isFirst)
         {
-            EventManager.CallEvent(Constants.POP_CARD);
-            // Debug.Log(myCard);
-            EventManager.CallEvent(Constants.PLUS_HAND);
-            yield return waitSeconds;
+            //내 카드 받기
+            for (int i = 0; i < 5; i++)
+            {
+                EventManager.CallEvent(Constants.POP_CARD);
+                EventManager.CallEvent(Constants.PLUS_HAND);
+                yield return waitSeconds;
+            }
+            //상대 카드 주기
+            for (int i = 0; i < 5; i++)
+            {
+                EventManager.CallEvent(Constants.POP_CARD);
+                otherCards[i].SetHand(list[deckStack++], false);
+                yield return waitSeconds;
+            }
         }
-        //상대 카드 주기
-        for (int i = 0; i < 5; i++)
+        else
         {
-            EventManager.CallEvent(Constants.POP_CARD);
-            otherCards[i].SetHand(list[deckStack++], false);
-            yield return waitSeconds;
+            //상대 카드 주기
+            for (int i = 0; i < 5; i++)
+            {
+                EventManager.CallEvent(Constants.POP_CARD);
+                otherCards[i].SetHand(list[deckStack++], false);
+                yield return waitSeconds;
+            }
+            //내 카드 받기
+            for (int i = 0; i < 5; i++)
+            {
+                EventManager.CallEvent(Constants.POP_CARD);
+                EventManager.CallEvent(Constants.PLUS_HAND);
+                yield return waitSeconds;
+            }
         }
         //바닥에 패깔기 반복문
         for (int i = 0; i < floorCard; i++)
@@ -164,24 +195,49 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             EventManager.CallEvent(Constants.SET_FLOOR_CARD, list[deckStack++], false);
             yield return waitSeconds;
         }
-        //내 카드 받기
-        for (int i = 5; i < 10; i++)
+        if (isFirst)
         {
-            EventManager.CallEvent(Constants.PLUS_HAND);
-            EventManager.CallEvent(Constants.POP_CARD);
-            // Debug.Log(myCard);
-            // myCards[i].SetHand(list[deckStack++], true);
-            yield return waitSeconds;
+            //내 카드 받기
+            for (int i = 5; i < 10; i++)
+            {
+                EventManager.CallEvent(Constants.PLUS_HAND);
+                EventManager.CallEvent(Constants.POP_CARD);
+                yield return waitSeconds;
+            }
+            //상대 카드 주기
+            for (int i = 5; i < 10; i++)
+            {
+                EventManager.CallEvent(Constants.POP_CARD);
+                otherCards[i].SetHand(list[deckStack++], false);
+                yield return waitSeconds;
+            }
         }
-        //상대 카드 주기
-        for (int i = 5; i < 10; i++)
+        else
         {
-            EventManager.CallEvent(Constants.POP_CARD);
-            otherCards[i].SetHand(list[deckStack++], false);
-            yield return waitSeconds;
+            //상대 카드 주기
+            for (int i = 5; i < 10; i++)
+            {
+                EventManager.CallEvent(Constants.POP_CARD);
+                otherCards[i].SetHand(list[deckStack++], false);
+                yield return waitSeconds;
+            }
+            //내 카드 받기
+            for (int i = 5; i < 10; i++)
+            {
+                EventManager.CallEvent(Constants.PLUS_HAND);
+                EventManager.CallEvent(Constants.POP_CARD);
+                // Debug.Log(myCard);
+                // myCards[i].SetHand(list[deckStack++], true);
+                yield return waitSeconds;
+            }
         }
+        
         SortHand();
-        if(isFirst) StartTurn();
+        if (isFirst)
+        {
+            StartTurn();
+            EventManager.CallEvent(Constants.READY_TO_PLAY);
+        }
         else EndTurn();
         StartCoroutine(CheckCard());
     }
@@ -215,7 +271,6 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         Debug.Log("not Joker");
         
         myCards[myHand].SetHand(deckList[deckStack++], true);
-        myCardObject[myHand] = myCards[myHand].gameObject;
         myHand++;
     }
     void SortHand()
@@ -296,7 +351,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
                     index = i,
                     month = -1,
                     score = 2 + i % 48,
-                    type = CARD_TYPE.JOKER,
+                    type = CARD_TYPE.NORMAL,
                     sCard = sCard,
                 };
                 basicDeck.Add(c);

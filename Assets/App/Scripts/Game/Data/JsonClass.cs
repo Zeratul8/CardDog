@@ -7,8 +7,8 @@ public enum CARD_TYPE{
     NORMAL, //피
     BAND, //띠
     LIGHT, //광
-    SPECIAL, //열끗? 멍?
-    JOKER // 특수카드
+    SPECIAL //열끗? 멍?
+    // JOKER // 특수카드
 }
 public enum SPECIAL_CARD{
     NORMAL, //보통
