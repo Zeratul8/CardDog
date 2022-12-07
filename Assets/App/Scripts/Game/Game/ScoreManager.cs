@@ -95,6 +95,43 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             list.Add(go.GetComponent<CardScript>());
         }
     }
+    public void PassCard()
+    {
+        if (scoreDict[CARD_TYPE.NORMAL].count > 0)
+        {
+            CardClass card = null;
+            for(int i = 0; i < scoreDict[CARD_TYPE.NORMAL].count; i++)
+            {
+                if(cardLists[CARD_TYPE.NORMAL][i].GetCardClass().score == 1)
+                {
+                    card = cardLists[CARD_TYPE.NORMAL][i].RemoveCard();
+                    for(int j = i+1; j < scoreDict[CARD_TYPE.NORMAL].count; j++)
+                    {
+                        CardClass temp = cardLists[CARD_TYPE.NORMAL][j].RemoveCard();
+                        cardLists[CARD_TYPE.NORMAL][j - 1].SetCard(temp);
+                    }
+                }
+                if (card != null)
+                {
+                    scoreDict[CARD_TYPE.NORMAL].count--;
+                    scoreDict[CARD_TYPE.NORMAL].score -= card.score;
+                    SetText(CARD_TYPE.NORMAL, true);
+                    AddPoint(card, false);
+                    return;
+                }
+            }
+            card = cardLists[CARD_TYPE.NORMAL][0].RemoveCard();
+            for(int i = 1; i < scoreDict[CARD_TYPE.NORMAL].count; i++)
+            {
+                CardClass temp = cardLists[CARD_TYPE.NORMAL][i].RemoveCard();
+                cardLists[CARD_TYPE.NORMAL][i - 1].SetCard(temp);
+            }
+            scoreDict[CARD_TYPE.NORMAL].count--;
+            scoreDict[CARD_TYPE.NORMAL].score -= card.score;
+            SetText(CARD_TYPE.NORMAL, true);
+            AddPoint(card, false);
+        }
+    }
     public void AddPoint(CardClass cardClass, bool isMine = true)
     {
         if (isMine)

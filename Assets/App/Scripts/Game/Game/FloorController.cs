@@ -225,7 +225,7 @@ public class FloorController : MonoBehaviour
                     if (isSameMonth)
                     {
                         Debug.Log("ÂÊ");
-                        GetOtherCard();
+                        TakeACard();
                     }
                     floorActive[card.month] = 0;
                     Debug.Log("Ä«µå ¸Ô±â");
@@ -234,6 +234,7 @@ public class FloorController : MonoBehaviour
                     if (isSameMonth)
                     {
                         Debug.Log("»¶");
+                        PassACard();
                         playedCardQueue.Clear();
                     }
                     else
@@ -254,7 +255,7 @@ public class FloorController : MonoBehaviour
                     {
                         Debug.Log("»¶ ¸Ô±â.");
                     }
-                    GetOtherCard();
+                    TakeACard();
                     for (int i = 0; i < floorActive[card.month]; i++)
                     {
                         cc = floorCards[card.month][i].RemoveCard();
@@ -266,8 +267,13 @@ public class FloorController : MonoBehaviour
             if (isSameMonth) break;
         }
     }
-    void GetOtherCard(){
+    void TakeACard(){
         Debug.Log("ÇÇ»¯¾î¿À±â.");
+        //¼­¹ö¿¡ ¿äÃ»ÇÏ±â or ÀÌº¥Æ® Ã³¸®.
+    }
+    void PassACard()
+    {
+        ScoreManager.Instance.PassCard();
     }
     IEnumerator SelectCard(int month){
         //ÆË¾÷ ¶ç¿ö¼­ ¼±ÅÃÇÏ±â.

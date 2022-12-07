@@ -102,28 +102,29 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         //셔플 애니메이션 
         yield return new WaitForSeconds(2);
-        StartGame(Shuffle(), false);
+        StartGame(Shuffle(), true);
     }
     List<CardClass> Shuffle()
     {
         // int count = intList.Count;
         // int count = DeckMaxCount;
-        int count = 48;
-        for (int i = 0; i < count; i++)
+        int count = DeckMaxCount;
+        for (int i = 3; i < count; i++)
         {
-            int r = Random.Range(0, count);
+            int r = Random.Range(3, count);
             int j = intList[i];
             intList[i] = intList[r];
             intList[r] = j;
         }
         {
-            int tmp = intList[3];
-            intList[3] = intList[48];
-            intList[48] = tmp;
+            int tmp = intList[1];
+            intList[1] = intList[4];
+            intList[4] = tmp;
 
             tmp = intList[2];
-            intList[2] = intList[49];
-            intList[49] = tmp;
+            intList[2] = intList[30];
+            intList[30] = tmp;
+
         }
         
         // deck.Clear();
