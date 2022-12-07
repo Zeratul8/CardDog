@@ -8,8 +8,10 @@ public class FloorController : MonoBehaviour
     #region Constants and Fields
     public Transform deckParent;
     public GameObject deckObject;
+
     public Transform cardParent;
     public GameObject cardObject;
+
     List<GameObject> deck;
     Dictionary<int, List<CardScript>> floorCards;
     List<int> floorActive;
@@ -159,7 +161,7 @@ public class FloorController : MonoBehaviour
         else{
             if(PlayerManager.Instance.playState != PlayerManager.PlayState.InitGame)
             {
-                StartCoroutine(AddPoint());
+                StartCoroutine(AddPoint(true));
             }
         }
     }
@@ -179,11 +181,11 @@ public class FloorController : MonoBehaviour
     }
     void SetReady(params object[] param)
     {
-        StartCoroutine(AddPoint());
+        bool isMine = (bool)param[0];
+        StartCoroutine(AddPoint(isMine));
     }
-    IEnumerator AddPoint(){
+    IEnumerator AddPoint(bool isMine){
         yield return new WaitForSeconds(0.5f);
-        Debug.Log(jokerQueue.Count);
         while(jokerQueue.Count > 0)
         {
             CardClass card = jokerQueue.Dequeue();
@@ -192,7 +194,7 @@ public class FloorController : MonoBehaviour
                 if (floorCards[jokerMonth][i].GetCardClass().Equals(card))
                 {
                     card = floorCards[jokerMonth][i].RemoveCard();
-                    ScoreManager.Instance.AddPoint(card);
+                    ScoreManager.Instance.AddPoint(card, isMine);
                     for(int j = i + 1; j < floorActive[jokerMonth]; j++)
                     {
                         CardClass cardClass = floorCards[jokerMonth][j].RemoveCard();
@@ -209,7 +211,6 @@ public class FloorController : MonoBehaviour
         {
             CardClass card = playedCardQueue.Dequeue();
             bool isSameMonth = playedCardQueue.Count > 0 && playedCardQueue.Peek().month == card.month;
-            Debug.Log(isSameMonth.ToString());
             switch (floorActive[card.month] - jokerQueue.Count)
             {
                 case 1:
@@ -219,7 +220,7 @@ public class FloorController : MonoBehaviour
                     for (int i = 0; i < floorActive[card.month]; i++)
                     {
                         cc = floorCards[card.month][i].RemoveCard();
-                        ScoreManager.Instance.AddPoint(cc);
+                        ScoreManager.Instance.AddPoint(cc, isMine);
                     }
                     if (isSameMonth)
                     {
@@ -239,7 +240,7 @@ public class FloorController : MonoBehaviour
                     {
                         yield return StartCoroutine(SelectCard(card.month));
                         cc = floorCards[card.month][2].RemoveCard();
-                        ScoreManager.Instance.AddPoint(cc);
+                        ScoreManager.Instance.AddPoint(cc, isMine);
                         floorActive[card.month] -= 2;
                         Debug.Log("한장 고르기");
                     }

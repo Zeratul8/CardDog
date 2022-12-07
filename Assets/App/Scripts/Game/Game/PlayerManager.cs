@@ -233,10 +233,10 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         
         SortHand();
+        EventManager.CallEvent(Constants.READY_TO_PLAY, isFirst);
         if (isFirst)
         {
             StartTurn();
-            EventManager.CallEvent(Constants.READY_TO_PLAY);
         }
         else EndTurn();
         StartCoroutine(CheckCard());
