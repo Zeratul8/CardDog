@@ -234,7 +234,7 @@ public class FloorController : MonoBehaviour
                     if (isSameMonth)
                     {
                         Debug.Log("»¶");
-                        PassACard();
+                        //PassACard();
                         playedCardQueue.Clear();
                     }
                     else
@@ -273,7 +273,10 @@ public class FloorController : MonoBehaviour
     }
     void PassACard()
     {
-        ScoreManager.Instance.PassCard();
+        CardClass card = ScoreManager.Instance.PassCard();
+        if (card == null) return;
+        //¼­¹ö¿¡ Àü´Þ.
+        ScoreManager.Instance.AddPoint(card, false);
     }
     IEnumerator SelectCard(int month){
         //ÆË¾÷ ¶ç¿ö¼­ ¼±ÅÃÇÏ±â.

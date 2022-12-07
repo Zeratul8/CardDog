@@ -95,7 +95,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             list.Add(go.GetComponent<CardScript>());
         }
     }
-    public void PassCard()
+    public CardClass PassCard()
     {
         if (scoreDict[CARD_TYPE.NORMAL].count > 0)
         {
@@ -116,8 +116,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                     scoreDict[CARD_TYPE.NORMAL].count--;
                     scoreDict[CARD_TYPE.NORMAL].score -= card.score;
                     SetText(CARD_TYPE.NORMAL, true);
-                    AddPoint(card, false);
-                    return;
+                    return card;
                 }
             }
             card = cardLists[CARD_TYPE.NORMAL][0].RemoveCard();
@@ -129,8 +128,9 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             scoreDict[CARD_TYPE.NORMAL].count--;
             scoreDict[CARD_TYPE.NORMAL].score -= card.score;
             SetText(CARD_TYPE.NORMAL, true);
-            AddPoint(card, false);
+            return card;
         }
+        return null;
     }
     public void AddPoint(CardClass cardClass, bool isMine = true)
     {
