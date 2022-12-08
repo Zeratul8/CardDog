@@ -234,6 +234,7 @@ public class FloorController : MonoBehaviour
                     if (isSameMonth)
                     {
                         Debug.Log("»¶");
+                        ScoreManager.Instance.SetState(ScoreState.Poop, true);
                         //PassACard();
                         playedCardQueue.Clear();
                     }

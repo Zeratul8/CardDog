@@ -3,8 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+public enum ScoreState
+{
+    Go,
+    Shake,
+    Poop
+}
 public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
 {
+    
     // Start is called before the first frame update
     public int padding;
 
@@ -25,12 +32,40 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     Dictionary<CARD_TYPE, List<CardScript>> otherCardLists;
     Dictionary<CARD_TYPE, ScoreClass> scoreDict;
     Dictionary<CARD_TYPE, ScoreClass> otherScoreDict;
+    class StateClass
+    {
+        public StateStruct state;
+        public TextMeshProUGUI textMesh;
+        public StateClass(StateStruct _state, TextMeshProUGUI _text)
+        {
+            state = _state;
+            textMesh = _text;
+        }
+    }
+    Dictionary<ScoreState, StateClass> stateDict;
+    Dictionary<ScoreState, StateClass> otherStateDict;
 
-    //ScoreClass band;   
-    //ScoreClass special;   
-    //ScoreClass lightCard;   
-    //ScoreClass normal;   
+    public GameObject myTexts;
+    public GameObject otherTexts;
 
+    struct StateStruct
+    {
+        public ScoreState state { get; }
+        public string name { get; }
+        public int point;
+        public void AddPoint()
+        {
+            point++;
+            Debug.Log(point);
+        }
+
+            public StateStruct(ScoreState _state, int _point, string _name)
+        {
+            state = _state;
+            name = _name;
+            point = _point;
+        }
+    }
     class ScoreClass
     {   
         public ScoreClass(int _count, List<CardScript> _list, TextMeshProUGUI _text)
@@ -51,7 +86,20 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         scoreDict = new Dictionary<CARD_TYPE, ScoreClass>();
         otherScoreDict = new Dictionary<CARD_TYPE, ScoreClass>();
         otherCardLists = new Dictionary<CARD_TYPE, List<CardScript>>();
+        stateDict = new Dictionary<ScoreState, StateClass>();
+        otherStateDict = new Dictionary<ScoreState, StateClass>();
+        string[] strings = { "°í", "Èç", "»¶"};
+        TextMeshProUGUI[] my = myTexts.GetComponentsInChildren<TextMeshProUGUI>();
+        TextMeshProUGUI[] other = otherTexts.GetComponentsInChildren<TextMeshProUGUI>();
 
+        for (int i = 0; i <3; i++)
+        {
+            ScoreState scoreState = (ScoreState)i;
+            StateStruct stateStruct = new StateStruct(scoreState, 0, strings[i]);
+            
+            stateDict.Add(scoreState, new StateClass(stateStruct, my[i]));
+            otherStateDict.Add(scoreState, new StateClass(stateStruct, other[i]));
+        }
 
         Initiate(10, CARD_TYPE.BAND, bandArea);
         Initiate(10, CARD_TYPE.SPECIAL, specialArea);
@@ -163,6 +211,20 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         
         SetText(cardClass.type, isMine);
     }
+    public void SetState(ScoreState state, bool isMine)
+    {
+        switch (isMine)
+        {
+            case true:
+                stateDict[state].state.AddPoint();
+                stateDict[state].textMesh.text = stateDict[state].state.point + $" {stateDict[state].state.name}";
+                break;
+            case false:
+                otherStateDict[state].state.AddPoint();
+                otherStateDict[state].textMesh.text = otherStateDict[state].state.point +" "+ otherStateDict[state].state.name;
+                break;
+        }
+    }
     void SetText(CARD_TYPE type, bool isMine = true)    
     {
         if (isMine)
@@ -174,8 +236,13 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             otherScoreDict[type].text.text = otherScoreDict[type].score > 0 ? otherScoreDict[type].score.ToString() : "";
         }
     }
+    
     void FinishGame(params object[] param)
     {
+        for(int i = 0; i <3; i++)
+        {
+            //stateDict[(ScoreState)i] = 0;
+        }
         for(int i = 0; i < 4; i++)
         {
             CARD_TYPE ct = (CARD_TYPE)i;
