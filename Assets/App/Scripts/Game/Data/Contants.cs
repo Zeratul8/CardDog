@@ -23,3 +23,9 @@ public static class Constants
 
 
 }
+public enum ScoreState
+{
+    Go,
+    Shake,
+    Poop
+}
