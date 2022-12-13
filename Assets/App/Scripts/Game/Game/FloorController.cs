@@ -14,6 +14,7 @@ public class FloorController : MonoBehaviour
 
     List<GameObject> deck;
     Dictionary<int, List<CardScript>> floorCards;
+    Dictionary<int, bool> poopDict;
     List<int> floorActive;
     Queue<CardClass> playedCardQueue;
     Queue<CardClass> jokerQueue;
@@ -39,6 +40,7 @@ public class FloorController : MonoBehaviour
         deck = new List<GameObject>();
         playedCardQueue = new Queue<CardClass>();
         jokerQueue = new Queue<CardClass>();
+        poopDict = new Dictionary<int, bool>();
         EventManager.AddListener(Constants.POP_CARD, PopCard);
         EventManager.AddListener(Constants.SET_FLOOR_CARD, SetFloorCard);
         EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
@@ -80,6 +82,21 @@ public class FloorController : MonoBehaviour
             }
         }
         if(floorActive == null) floorActive = new List<int>();
+        if(poopDict == null)
+        {
+            poopDict = new Dictionary<int, bool>();
+            for(int i = 0; i < monthCount; i++)
+            {
+                poopDict.Add(i, false);
+            }
+        }
+        else
+        {
+            for(int i = 0; i<monthCount; i++)
+            {
+                poopDict[i] = false;
+            }
+        }
         InitFloorCard();
 
     }
@@ -223,7 +240,7 @@ public class FloorController : MonoBehaviour
                     }
                     if (isSameMonth)
                     {
-                        Debug.Log("ÂÊ");
+                        ScoreManager.Instance.SetStateTextMethod("ÂÊ");
                         TakeACard();
                     }
                     floorActive[card.month] = 0;
@@ -231,8 +248,10 @@ public class FloorController : MonoBehaviour
                 case 3:
                     if (isSameMonth)
                     {
-                        Debug.Log("»¶");
+                        
+                        ScoreManager.Instance.SetStateTextMethod("»¶");
                         ScoreManager.Instance.SetState(ScoreState.Poop, true);
+                        poopDict[card.month] = true;
                         //PassACard();
                         playedCardQueue.Clear();
                     }
@@ -248,11 +267,18 @@ public class FloorController : MonoBehaviour
                 case 4:
                     if (isSameMonth)
                     {
-                        Debug.Log("µû´Ú");
+                        ScoreManager.Instance.SetStateTextMethod("µû´Ú");
+                        
                     }
                     else
                     {
-                        Debug.Log("»¶ ¸Ô±â.");
+                        if (poopDict[card.month])
+                        {
+                            ScoreManager.Instance.SetStateTextMethod("ÀÚ»¶Àº µÎ Àå");
+                            TakeACard();
+                        }else
+                            ScoreManager.Instance.SetStateTextMethod("»¶ ¸Ô±â");
+                        
                     }
                     TakeACard();
                     for (int i = 0; i < floorActive[card.month]; i++)

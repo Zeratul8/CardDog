@@ -315,7 +315,6 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                     if (pointDict[type].max >= 10)
                     {
                         preScore = pointDict[type].score;
-                        Debug.Log($"preScore : {preScore}");
                         pointDict[type].score = pointDict[type].max - 9;
                         int sub = pointDict[type].score - preScore;
                         scoreDict[isMine] += sub;
@@ -336,7 +335,6 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                     switch (pointDict[type].max) {
                         case 3:
                             //ºñ »ï±¤ÀÎÁö ¾Æ´ÑÁö
-                            Debug.Log($"ºñ±¤ÀÌ ÀÖ³ª¿ë : {hasRain}");
                             if (hasRain)
                             {
                                 scoreDict[isMine] += 2;
@@ -492,6 +490,10 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
 
         }
         
+    }
+    public void SetStateTextMethod(string str)
+    {
+        StartCoroutine(SetStateText(stateTextDict[true], str));
     }
     IEnumerator SetStateText(TextMeshProUGUI tmp, string str)
     {
