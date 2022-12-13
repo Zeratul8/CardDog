@@ -64,6 +64,14 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     public Transform otherSpecialArea;
     public Transform otherNormalArea;
 
+    public GameObject myTexts;
+    public TextMeshProUGUI myScore;
+    public TextMeshProUGUI myState;
+        
+    public GameObject otherTexts;
+    public TextMeshProUGUI otherScore;
+    public TextMeshProUGUI otherState;
+
     //Dictionary<CARD_TYPE, int> cardCount;
     Dictionary<CARD_TYPE, List<CardScript>> cardLists;
     Dictionary<CARD_TYPE, List<CardScript>> otherCardLists;
@@ -75,16 +83,11 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     Dictionary<ScoreState, StateClass> stateDict;
     Dictionary<ScoreState, StateClass> otherStateDict;
 
-    public GameObject myTexts;
-    public TextMeshProUGUI myScore;
-    public TextMeshProUGUI myState;
-        
-    public GameObject otherTexts;
-    public TextMeshProUGUI otherScore;
-    public TextMeshProUGUI otherState;
 
     Dictionary<bool, int> scoreDict = new Dictionary<bool, int>();
     Dictionary<bool, TextMeshProUGUI> stateTextDict = new Dictionary<bool, TextMeshProUGUI>();
+
+    Queue<Coroutine> coroutineQueue = new Queue<Coroutine>();
 
     protected override void OnStart()
     {
@@ -339,27 +342,27 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                             {
                                 scoreDict[isMine] += 2;
                                 lightString = "ºñ»ï±¤";
-                                StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                                coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
                                 Debug.Log(lightString);
                             }
                             else
                             {
                                 scoreDict[isMine] += 3;
                                 lightString = "»ï±¤";
-                                StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                                coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
                                 Debug.Log(lightString);
                             }
                             break;
                         case 4:
                             scoreDict[isMine] += 4;
                             lightString = "»ç±¤";
-                            StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                            coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
                             Debug.Log(lightString);
                             break;
                         case 5:
                             scoreDict[isMine] += 15;
                             lightString = "¿À±¤";
-                            StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                            coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
                             Debug.Log(lightString);
                             break;
                     }
@@ -500,5 +503,12 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         tmp.text = str;
         yield return new WaitForSeconds(1.5f);
         tmp.text = "";
+    }
+    IEnumerator StartCoroutines()
+    {
+        while (coroutineQueue.Count > 0)
+        {
+            yield return coroutineQueue.Dequeue();
+        }
     }
 }
