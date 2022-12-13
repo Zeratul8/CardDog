@@ -73,7 +73,6 @@ public class CardScript : MonoBehaviour
     {
         if (PlayerManager.Instance.isMyTurn)
         {
-            Debug.Log(myCardData.index);
             if (myCardData.index > 47)
             {
                 //gameObject.SetActive(false);

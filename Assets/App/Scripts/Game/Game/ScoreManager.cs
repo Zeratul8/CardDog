@@ -75,9 +75,15 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     Dictionary<ScoreState, StateClass> otherStateDict;
 
     public GameObject myTexts;
+    public TextMeshProUGUI myScore;
+    public TextMeshProUGUI myState;
+        
     public GameObject otherTexts;
+    public TextMeshProUGUI otherScore;
+    public TextMeshProUGUI otherState;
 
     Dictionary<bool, int> scoreDict = new Dictionary<bool, int>();
+    Dictionary<bool, TextMeshProUGUI> stateTextDict = new Dictionary<bool, TextMeshProUGUI>();
 
     protected override void OnStart()
     {
@@ -88,15 +94,28 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         otherCardLists = new Dictionary<CARD_TYPE, List<CardScript>>();
         stateDict = new Dictionary<ScoreState, StateClass>();
         otherStateDict = new Dictionary<ScoreState, StateClass>();
+        specialDict = new Dictionary<bool, Dictionary<SPECIAL_CARD, int>>();
+
         
-        for(int i = 0; i <2; i++)
+        stateTextDict.Add(true, myState);
+        stateTextDict.Add(false, otherState);
+        for (int i = 0; i <2; i++)
         {
             bool isMine = i % 2 == 0;
             scoreDict.Add(isMine, 0);
-            
+            specialDict.Add(isMine, new Dictionary<SPECIAL_CARD, int>());
+            stateTextDict[isMine].text = "";
+            foreach(SPECIAL_CARD sp in Enum.GetValues(typeof(SPECIAL_CARD)))
+            {
+                specialDict[isMine].Add(sp, 0);
+            }
         }
+        myScore.text = scoreDict[true].ToString();
+        otherScore.text = scoreDict[false].ToString();
 
-        
+
+
+
 
         string[] strings = { "고", "흔", "뻑"};
         TextMeshProUGUI[] my = myTexts.GetComponentsInChildren<TextMeshProUGUI>();
@@ -201,6 +220,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             {
                 pointDict[type].max = pointDict[type].point;
             }
+            
         }
         else
         {
@@ -211,29 +231,152 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                 otherPointDict[type].max = otherPointDict[type].point;
             }
         }
+        specialDict[isMine][cardClass.sCard]++;
         CalculateScore(cardClass.type, isMine);
         SetText(cardClass.type, isMine);
+        KeyValuePair<SPECIAL_CARD, int> pair = CheckBand(cardClass, isMine);
+        AddSpecial(pair, isMine);
+        if (isMine) myScore.text = scoreDict[isMine].ToString();
+        else otherScore.text = scoreDict[isMine].ToString();
+
+    }
+    void AddSpecial(KeyValuePair<SPECIAL_CARD, int> pair, bool isMine)
+    {
+        string stateString = "";
+        const string warning = "비상";
+        switch (pair.Value)
+        {
+            case 2:
+                switch (pair.Key)
+                {
+                    case SPECIAL_CARD.FIVEVBIRD:
+                        stateString = $"고도리 {warning}";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        Debug.Log(stateString);
+                        break;
+                    case SPECIAL_CARD.BLUEBAND:
+                        stateString = $"청단 {warning}";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        Debug.Log(stateString);
+                        break;
+                    case SPECIAL_CARD.REDBAND:
+                        stateString = $"홍단 {warning}";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        Debug.Log(stateString);
+                        break;
+                    case SPECIAL_CARD.GRASSBAND:
+                        stateString = $"초단 {warning}";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        Debug.Log(stateString);
+                        break;
+                }
+                break;
+            case 3:
+                switch (pair.Key)
+                {
+                    case SPECIAL_CARD.FIVEVBIRD:
+                        stateString = "고도리";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        Debug.Log(stateString);
+                        scoreDict[isMine] += 5;
+                        break;
+                    case SPECIAL_CARD.BLUEBAND:
+                        stateString = "청단";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        scoreDict[isMine] += 3;
+                        Debug.Log(stateString);
+                        break;
+                    case SPECIAL_CARD.REDBAND:
+                        stateString = "홍단";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        scoreDict[isMine] += 3;
+                        Debug.Log(stateString);
+                        break;
+                    case SPECIAL_CARD.GRASSBAND:
+                        stateString = "초단";
+                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        scoreDict[isMine] += 2;
+                        Debug.Log(stateString);
+                        break;
+                }
+                break;
+        }
     }
     void CalculateScore(CARD_TYPE type, bool isMine)
     {
-        switch (type)
+        if (isMine)
         {
-            case CARD_TYPE.NORMAL:
-                if (pointDict[type].max >= 10)
-                {
-                    pointDict[type].score = pointDict[type].max - 9;
-                }
-                break;
-            case CARD_TYPE.BAND:
-            case CARD_TYPE.SPECIAL:
-                if(pointDict[type].max >= 5)
-                {
-                    pointDict[type].score = pointDict[type].max - 5;
-                }
-                break;
-            case CARD_TYPE.LIGHT:
-                break;
+            int preScore = 0;
+            switch (type)
+            {
+                case CARD_TYPE.NORMAL:
+                    if (pointDict[type].max >= 10)
+                    {
+                        preScore = pointDict[type].score;
+                        pointDict[type].score = pointDict[type].max - 9;
+                        int sub = pointDict[type].score - preScore;
+                        scoreDict[isMine] += sub;
+                    }
+                    break;
+                case CARD_TYPE.BAND:
+                case CARD_TYPE.SPECIAL:
+                    if (pointDict[type].max >= 5)
+                    {
+                        preScore = pointDict[type].score;
+                        pointDict[type].score = pointDict[type].max - 4;
+                        int sub = pointDict[type].score - preScore;
+                        scoreDict[isMine] += sub;
+                    }
+                    break;
+                case CARD_TYPE.LIGHT:
+                    switch (pointDict[type].max) {
+                        case 3:
+                            //비 삼광인지 아닌지
+                            break;
+                        case 4:
+                            //4광 점수
+                            break;
+                        case 5:
+                            //5광 점수
+                            break;
+                    }
+                    break;
+            }
         }
+        else
+        {
+
+        }
+    }
+    KeyValuePair<SPECIAL_CARD, int> CheckBand(CardClass cardClass, bool isMine)
+    {
+        bool isPossible = true;
+        SPECIAL_CARD sc = cardClass.sCard;
+        if (sc == SPECIAL_CARD.NORMAL) return new KeyValuePair<SPECIAL_CARD, int>(sc, 0);
+        //내가 한 장 이상 가지고 있음.
+        if (specialDict[isMine][sc] > 0)
+        {
+            // 상대방도 가지고 있음. : 불가능.
+            if (specialDict[!isMine][sc] > 0) isPossible = false;
+        }
+        // 불가능이면 0 리턴.
+        if (!isPossible) return new KeyValuePair<SPECIAL_CARD, int>(sc, 1);
+        else
+        {
+            // 가능한 경우에,
+            switch (specialDict[isMine][sc])
+            {
+
+                case 2:
+                    // 2장 있음 -> 비상, 경고 등 표시
+                    return new KeyValuePair<SPECIAL_CARD, int>(sc, 2);
+                case 3:
+                    // 3장 있음 -> 달성했음. 
+                    return new KeyValuePair<SPECIAL_CARD, int>(sc, 3);
+            }
+        }
+        // 점수랑 현재 상관 없음. 가능성은 열려있음
+        return new KeyValuePair<SPECIAL_CARD, int>(sc, 0);
     }
     public void SetState(ScoreState state, bool isMine)
     {
@@ -263,7 +406,19 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     
     void FinishGame(params object[] param)
     {
-        foreach(ScoreState state in Enum.GetValues(typeof(ScoreState)))
+        for(int i = 0; i < 2; i++)
+        {
+            bool isMine = i % 2 == 0;
+            scoreDict[isMine] = 0;
+            foreach(SPECIAL_CARD sc in Enum.GetValues(typeof(SPECIAL_CARD)))
+            {
+                specialDict[isMine][sc] = 0;
+            }
+        }
+        myScore.text = scoreDict[true].ToString();
+        otherScore.text = scoreDict[false].ToString();
+
+        foreach (ScoreState state in Enum.GetValues(typeof(ScoreState)))
         {
             stateDict[state].state.point = 0;
         }
@@ -296,5 +451,11 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
 
         }
         
+    }
+    IEnumerator SetStateText(TextMeshProUGUI tmp, string str)
+    {
+        tmp.text = str;
+        yield return new WaitForSeconds(1.5f);
+        tmp.text = "";
     }
 }

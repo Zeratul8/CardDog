@@ -214,7 +214,6 @@ public class FloorController : MonoBehaviour
             switch (floorActive[card.month] - jokerQueue.Count)
             {
                 case 1:
-                    Debug.Log("패 한장");
                     break;
                 case 2:
                     for (int i = 0; i < floorActive[card.month]; i++)
@@ -228,7 +227,6 @@ public class FloorController : MonoBehaviour
                         TakeACard();
                     }
                     floorActive[card.month] = 0;
-                    Debug.Log("카드 먹기");
                     break;
                 case 3:
                     if (isSameMonth)
@@ -302,7 +300,7 @@ public class FloorController : MonoBehaviour
 
         if (isFinish)
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(2);
             EventManager.CallEvent(Constants.FINISH_GAME);
         }
     }

@@ -262,14 +262,12 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         if (param.Length > 0)
         {
             CardScript cs = param[0] as CardScript;
-            Debug.Log("isJoker");
             EventManager.CallEvent(Constants.POP_CARD);
             cs.SetHand(deckList[deckStack++], true);
             SortHand();
             myHand++;
             return;
         }
-        Debug.Log("not Joker");
         
         myCards[myHand].SetHand(deckList[deckStack++], true);
         myHand++;
