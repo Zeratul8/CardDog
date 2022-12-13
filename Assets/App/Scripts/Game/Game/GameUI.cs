@@ -29,20 +29,24 @@ public class GameUI : MonoBehaviour
     #endregion
 
     #region Methods
-    
+    void StartGame(object[] args)
+    {
+        btnStart.gameObject.SetActive(true);
+    }
     #endregion
 
     #region Unity Methods
     private void Awake()
     {
-        EventManager.AddListener(Constants.FINISH_GAME, (object[] args) =>
-        {
-            btnStart.gameObject.SetActive(true);
-        });
+        EventManager.AddListener(Constants.FINISH_GAME, StartGame);
+    }
+    private void OnDestroy()
+    {
+        EventManager.RemoveListener(Constants.FINISH_GAME, StartGame);   
     }
     #endregion
 
 
 
-    
+
 }

@@ -50,6 +50,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
 
     // Start is called before the first frame update
     public int padding;
+    public bool hasRain;
 
     public GameObject cardPrefabs;
 
@@ -232,6 +233,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             }
         }
         specialDict[isMine][cardClass.sCard]++;
+        hasRain = CheckLight(cardClass);
         CalculateScore(cardClass.type, isMine);
         SetText(cardClass.type, isMine);
         KeyValuePair<SPECIAL_CARD, int> pair = CheckBand(cardClass, isMine);
@@ -313,6 +315,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                     if (pointDict[type].max >= 10)
                     {
                         preScore = pointDict[type].score;
+                        Debug.Log($"preScore : {preScore}");
                         pointDict[type].score = pointDict[type].max - 9;
                         int sub = pointDict[type].score - preScore;
                         scoreDict[isMine] += sub;
@@ -329,15 +332,37 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                     }
                     break;
                 case CARD_TYPE.LIGHT:
+                    string lightString = "";
                     switch (pointDict[type].max) {
                         case 3:
                             //ºñ »ï±¤ÀÎÁö ¾Æ´ÑÁö
+                            Debug.Log($"ºñ±¤ÀÌ ÀÖ³ª¿ë : {hasRain}");
+                            if (hasRain)
+                            {
+                                scoreDict[isMine] += 2;
+                                lightString = "ºñ»ï±¤";
+                                StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                                Debug.Log(lightString);
+                            }
+                            else
+                            {
+                                scoreDict[isMine] += 3;
+                                lightString = "»ï±¤";
+                                StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                                Debug.Log(lightString);
+                            }
                             break;
                         case 4:
-                            //4±¤ Á¡¼ö
+                            scoreDict[isMine] += 4;
+                            lightString = "»ç±¤";
+                            StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                            Debug.Log(lightString);
                             break;
                         case 5:
-                            //5±¤ Á¡¼ö
+                            scoreDict[isMine] += 15;
+                            lightString = "¿À±¤";
+                            StartCoroutine(SetStateText(stateTextDict[isMine], lightString));
+                            Debug.Log(lightString);
                             break;
                     }
                     break;
@@ -347,6 +372,15 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         {
 
         }
+    }
+    bool CheckLight(CardClass cardClass)
+    {
+        if (hasRain) return true;
+        if(cardClass.month == 11)
+        {
+            return true;
+        }
+        return false;
     }
     KeyValuePair<SPECIAL_CARD, int> CheckBand(CardClass cardClass, bool isMine)
     {
@@ -406,6 +440,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     
     void FinishGame(params object[] param)
     {
+        hasRain = false;
         for(int i = 0; i < 2; i++)
         {
             bool isMine = i % 2 == 0;
@@ -421,6 +456,8 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         foreach (ScoreState state in Enum.GetValues(typeof(ScoreState)))
         {
             stateDict[state].state.point = 0;
+            stateDict[state].textMesh.text = $"0 {stateDict[state].state.name}";
+            
         }
         foreach (CARD_TYPE ct in Enum.GetValues(typeof(CARD_TYPE)))
         {
@@ -428,6 +465,8 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             pointDict[ct].point = 0;
             pointDict[ct].text.text = "";
             pointDict[ct].count = 0;
+            pointDict[ct].score = 0;
+            pointDict[ct].max = 0;
             for(int j = 0; j< pointDict[ct].list.Count; j++)
             {
                 if (pointDict[ct].list[j].gameObject.activeInHierarchy)
@@ -440,6 +479,8 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
             otherPointDict[ct].point = 0;
             otherPointDict[ct].text.text = "";
             otherPointDict[ct].count = 0;
+            otherPointDict[ct].max = 0;
+            otherPointDict[ct].score = 0;
             for (int j = 0; j < otherPointDict[ct].list.Count; j++)
             {
                 if (otherPointDict[ct].list[j].gameObject.activeInHierarchy)
