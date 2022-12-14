@@ -15,7 +15,7 @@ public class FloorController : MonoBehaviour
     List<GameObject> deck;
     Dictionary<int, List<CardScript>> floorCards;
     Dictionary<int, bool> poopDict;
-    List<int> floorActive;
+    public List<int> floorActive{get; private set;}
     Queue<CardClass> playedCardQueue;
     Queue<CardClass> jokerQueue;
     public GameUI gameUI;
@@ -181,6 +181,7 @@ public class FloorController : MonoBehaviour
                 StartCoroutine(AddPoint(true));
             }
         }
+        PlayerManager.Instance.SetBorderOn(month);
     }
     public void FinishGame(params object[] param){
         for(int i = 0 ; i<monthCount ; i++){
@@ -221,7 +222,7 @@ public class FloorController : MonoBehaviour
 
             }
             floorActive[jokerMonth]--;
-
+            
         }
         CardClass cc;
         while (playedCardQueue.Count > 0)
@@ -244,6 +245,7 @@ public class FloorController : MonoBehaviour
                         TakeACard();
                     }
                     floorActive[card.month] = 0;
+                    PlayerManager.Instance.SetBorderOff(card.month);
                     break;
                 case 3:
                     if (isSameMonth)
@@ -278,6 +280,8 @@ public class FloorController : MonoBehaviour
                             TakeACard();
                         }else
                             ScoreManager.Instance.SetStateTextMethod("»¶ ¸Ô±â");
+
+                        poopDict[card.month] = false;
                         
                     }
                     TakeACard();
@@ -287,6 +291,7 @@ public class FloorController : MonoBehaviour
                         ScoreManager.Instance.AddPoint(cc);
                     }
                     floorActive[card.month] = 0;
+                    PlayerManager.Instance.SetBorderOff(card.month);
                     break;
             }
             if (isSameMonth) break;

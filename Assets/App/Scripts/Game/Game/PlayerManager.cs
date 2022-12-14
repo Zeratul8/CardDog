@@ -19,17 +19,19 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     public CardScript[] otherCards;
     public bool isMyTurn = false;
     public PlayState playState = PlayState.Wating;
-    List<Transform> initTransform;
+    public Dictionary<int, bool> floorDict = new Dictionary<int, bool>();
 
     #endregion
 
 
     #region Private Constants and Fields
+    const int monthCount = 12;
     const int HandMaxCount = 10;
     const int DeckMaxCount = 50;
     int deckStack = 0;
     int myHand = 0;
     GameObject[] myCardObject = new GameObject[HandMaxCount];
+    List<Transform> initTransform;
     
     List<int> intList;
     List<CardClass> deckList;
@@ -56,6 +58,9 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         EventManager.AddListener(Constants.PLAY_NEXT, PlayNextCard);
         EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
         intList = new List<int>();
+        for(int i = 0 ; i< monthCount ; i++ ){
+            floorDict.Add(i, false);
+        }
         for (int i = 0; i < DeckMaxCount; i++)
         {
             intList.Add(i);
@@ -83,6 +88,12 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     #endregion
 
     #region Public Methods
+    public void SetBorderOff(int month){
+        floorDict[month] = false;
+    }
+    public void SetBorderOn(int month){
+        floorDict[month] = true;
+    }
 
     #endregion
 
@@ -92,6 +103,9 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         for(int i = 0; i < initTransform.Count; i++)
         {
             initTransform[i].SetAsLastSibling();
+        }
+        for(int i = 0 ; i<monthCount; i++){
+            SetBorderOff(i);
         }
     }
     void ClickStartButton(params object[] param)
@@ -251,6 +265,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         playState = PlayState.MyTurn;
         isMyTurn = true;
+
     }
     void EndTurn()
     {

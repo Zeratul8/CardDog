@@ -10,6 +10,7 @@ public class CardScript : MonoBehaviour
     CardClass myCardData;
     Image image;
     GameUI gameUI;
+    GameObject borderLine;
     #endregion
 
     #region Properties
@@ -24,10 +25,18 @@ public class CardScript : MonoBehaviour
         image = GetComponent<Image>();
         gameUI = GetComponentInParent<GameUI>();
         EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
-        
+        EventManager.AddListener(Constants.READY_TO_PLAY, ReadyToPlay);
+        if (transform.childCount > 0)
+        {
+            borderLine = transform.GetChild(0).gameObject;
+            Debug.Log(borderLine.name);
+            borderLine.SetActive(false);
+        }
     }
+    
     private void OnDestroy() {
         EventManager.RemoveListener(Constants.FINISH_GAME, FinishGame);
+        EventManager.RemoveListener(Constants.READY_TO_PLAY, ReadyToPlay);
     }
     #endregion
 
@@ -48,12 +57,6 @@ public class CardScript : MonoBehaviour
         gameObject.SetActive(true);
         if (isMine)
         {
-            image.sprite = gameUI.sprites[cardClass.index];
-            myCardData = cardClass;
-        }
-    }
-    public void SetHand(CardClass cardClass){
-        if(gameObject.activeInHierarchy){
             image.sprite = gameUI.sprites[cardClass.index];
             myCardData = cardClass;
         }
@@ -94,8 +97,35 @@ public class CardScript : MonoBehaviour
     {
         EventManager.CallEvent(Constants.MINUS_HAND);
     }
-    void FinishGame(params object[] param){
+    void ReadyToPlay(params object[] param)
+    {
+        if (transform.childCount > 0)
+            StartCoroutine(CheckBorderOn());
+    }
+    void FinishGame(params object[] param)
+    {
+        if(borderLine != null)borderLine.SetActive(false);
         gameObject.SetActive(false);
+        StopAllCoroutines();
+    }
+    IEnumerator CheckBorderOn()
+    {
+        if (myCardData.month >= 0)
+        {
+            yield return new WaitUntil(() => PlayerManager.Instance.floorDict[myCardData.month]);
+            borderLine.SetActive(true);
+            StartCoroutine(CheckBorderOff());
+        }
+
+    }
+    IEnumerator CheckBorderOff()
+    {
+        if (myCardData.month >= 0)
+        {
+            yield return new WaitWhile(() => PlayerManager.Instance.floorDict[myCardData.month]);
+            borderLine.SetActive(false);
+            StartCoroutine(CheckBorderOn());
+        }
     }
     #endregion
 }
