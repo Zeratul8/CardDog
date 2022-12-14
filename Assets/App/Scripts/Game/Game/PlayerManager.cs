@@ -8,11 +8,11 @@ using System.Linq;
 public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
 {
     public enum PlayState{
-        Wating, //ì‹œì‘ ì „
-        InitGame, //íŒ¨ ë‚˜ëˆ„ëŠ” ì¤‘
-        MyTurn, // ë‚´ í„´
-        OtherTurn, // ìƒëŒ€ í„´
-        FinishGame, // ê²Œì„ ì¢…ë£Œ ì‹œ
+        Wating, //½ÃÀÛ Àü
+        InitGame, //ÆĞ ³ª´©´Â Áß
+        MyTurn, // ³» ÅÏ
+        OtherTurn, // »ó´ë ÅÏ
+        FinishGame, // °ÔÀÓ Á¾·á ½Ã
     }
     #region Public Constants and Fields
     public CardScript[] myCards;
@@ -100,7 +100,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     IEnumerator ShuffleCoroutine()
     {
-        //ì…”í”Œ ì• ë‹ˆë©”ì´ì…˜ 
+        //¼ÅÇÃ ¾Ö´Ï¸ŞÀÌ¼Ç 
         yield return new WaitForSeconds(2);
         StartGame(Shuffle(), true);
     }
@@ -135,7 +135,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         return deck;
     }
-    // ê²Œì„ ì‹œì‘.
+    // °ÔÀÓ ½ÃÀÛ.
     void StartGame(params object[] param)
     {
         playState = PlayState.InitGame;
@@ -145,10 +145,10 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     }
     IEnumerator ShareCard(List<CardClass> list, bool isFirst)
     {
-        //ì¹´ë“œ ê¹”ê¸°
+        //Ä«µå ±ò±â
         deckStack = 0;
         const int floorCard = 4;
-        //ë°”ë‹¥ì— íŒ¨ê¹”ê¸° ë°˜ë³µë¬¸
+        //¹Ù´Ú¿¡ ÆĞ±ò±â ¹İº¹¹®
         for (int i = 0; i < floorCard; i++)
         {
             EventManager.CallEvent(Constants.POP_CARD);
@@ -157,14 +157,14 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         if (isFirst)
         {
-            //ë‚´ ì¹´ë“œ ë°›ê¸°
+            //³» Ä«µå ¹Ş±â
             for (int i = 0; i < 5; i++)
             {
                 EventManager.CallEvent(Constants.POP_CARD);
                 EventManager.CallEvent(Constants.PLUS_HAND);
                 yield return waitSeconds;
             }
-            //ìƒëŒ€ ì¹´ë“œ ì£¼ê¸°
+            //»ó´ë Ä«µå ÁÖ±â
             for (int i = 0; i < 5; i++)
             {
                 EventManager.CallEvent(Constants.POP_CARD);
@@ -174,14 +174,14 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         else
         {
-            //ìƒëŒ€ ì¹´ë“œ ì£¼ê¸°
+            //»ó´ë Ä«µå ÁÖ±â
             for (int i = 0; i < 5; i++)
             {
                 EventManager.CallEvent(Constants.POP_CARD);
                 otherCards[i].SetHand(list[deckStack++], false);
                 yield return waitSeconds;
             }
-            //ë‚´ ì¹´ë“œ ë°›ê¸°
+            //³» Ä«µå ¹Ş±â
             for (int i = 0; i < 5; i++)
             {
                 EventManager.CallEvent(Constants.POP_CARD);
@@ -189,7 +189,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
                 yield return waitSeconds;
             }
         }
-        //ë°”ë‹¥ì— íŒ¨ê¹”ê¸° ë°˜ë³µë¬¸
+        //¹Ù´Ú¿¡ ÆĞ±ò±â ¹İº¹¹®
         for (int i = 0; i < floorCard; i++)
         {
             EventManager.CallEvent(Constants.POP_CARD);
@@ -198,14 +198,14 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         if (isFirst)
         {
-            //ë‚´ ì¹´ë“œ ë°›ê¸°
+            //³» Ä«µå ¹Ş±â
             for (int i = 5; i < 10; i++)
             {
                 EventManager.CallEvent(Constants.PLUS_HAND);
                 EventManager.CallEvent(Constants.POP_CARD);
                 yield return waitSeconds;
             }
-            //ìƒëŒ€ ì¹´ë“œ ì£¼ê¸°
+            //»ó´ë Ä«µå ÁÖ±â
             for (int i = 5; i < 10; i++)
             {
                 EventManager.CallEvent(Constants.POP_CARD);
@@ -215,14 +215,14 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         else
         {
-            //ìƒëŒ€ ì¹´ë“œ ì£¼ê¸°
+            //»ó´ë Ä«µå ÁÖ±â
             for (int i = 5; i < 10; i++)
             {
                 EventManager.CallEvent(Constants.POP_CARD);
                 otherCards[i].SetHand(list[deckStack++], false);
                 yield return waitSeconds;
             }
-            //ë‚´ ì¹´ë“œ ë°›ê¸°
+            //³» Ä«µå ¹Ş±â
             for (int i = 5; i < 10; i++)
             {
                 EventManager.CallEvent(Constants.PLUS_HAND);

@@ -87,7 +87,8 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     Dictionary<bool, int> scoreDict = new Dictionary<bool, int>();
     Dictionary<bool, TextMeshProUGUI> stateTextDict = new Dictionary<bool, TextMeshProUGUI>();
 
-    Queue<Coroutine> coroutineQueue = new Queue<Coroutine>();
+    Queue<IEnumerator> coroutineQueue = new Queue<IEnumerator>();
+    Coroutine coroutine = null;
 
     protected override void OnStart()
     {
@@ -116,9 +117,6 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         }
         myScore.text = scoreDict[true].ToString();
         otherScore.text = scoreDict[false].ToString();
-
-
-
 
 
         string[] strings = { "°í", "Èç", "»¶"};
@@ -243,7 +241,7 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
         AddSpecial(pair, isMine);
         if (isMine) myScore.text = scoreDict[isMine].ToString();
         else otherScore.text = scoreDict[isMine].ToString();
-
+        if(coroutine == null)coroutine = StartCoroutine(StartCoroutines());
     }
     void AddSpecial(KeyValuePair<SPECIAL_CARD, int> pair, bool isMine)
     {
@@ -256,22 +254,22 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                 {
                     case SPECIAL_CARD.FIVEVBIRD:
                         stateString = $"°íµµ¸® {warning}";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         Debug.Log(stateString);
                         break;
                     case SPECIAL_CARD.BLUEBAND:
                         stateString = $"Ã»´Ü {warning}";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         Debug.Log(stateString);
                         break;
                     case SPECIAL_CARD.REDBAND:
                         stateString = $"È«´Ü {warning}";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         Debug.Log(stateString);
                         break;
                     case SPECIAL_CARD.GRASSBAND:
                         stateString = $"ÃÊ´Ü {warning}";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         Debug.Log(stateString);
                         break;
                 }
@@ -281,25 +279,25 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                 {
                     case SPECIAL_CARD.FIVEVBIRD:
                         stateString = "°íµµ¸®";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         Debug.Log(stateString);
                         scoreDict[isMine] += 5;
                         break;
                     case SPECIAL_CARD.BLUEBAND:
                         stateString = "Ã»´Ü";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         scoreDict[isMine] += 3;
                         Debug.Log(stateString);
                         break;
                     case SPECIAL_CARD.REDBAND:
                         stateString = "È«´Ü";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         scoreDict[isMine] += 3;
                         Debug.Log(stateString);
                         break;
                     case SPECIAL_CARD.GRASSBAND:
                         stateString = "ÃÊ´Ü";
-                        StartCoroutine(SetStateText(stateTextDict[isMine], stateString));
+                        coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], stateString));
                         scoreDict[isMine] += 2;
                         Debug.Log(stateString);
                         break;
@@ -342,27 +340,27 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
                             {
                                 scoreDict[isMine] += 2;
                                 lightString = "ºñ»ï±¤";
-                                coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
+                                coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], lightString));
                                 Debug.Log(lightString);
                             }
                             else
                             {
                                 scoreDict[isMine] += 3;
                                 lightString = "»ï±¤";
-                                coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
+                                coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], lightString));
                                 Debug.Log(lightString);
                             }
                             break;
                         case 4:
                             scoreDict[isMine] += 4;
                             lightString = "»ç±¤";
-                            coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
+                            coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], lightString));
                             Debug.Log(lightString);
                             break;
                         case 5:
                             scoreDict[isMine] += 15;
                             lightString = "¿À±¤";
-                            coroutineQueue.Enqueue(StartCoroutine(SetStateText(stateTextDict[isMine], lightString)));
+                            coroutineQueue.Enqueue(SetStateText(stateTextDict[isMine], lightString));
                             Debug.Log(lightString);
                             break;
                     }
@@ -496,7 +494,8 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     }
     public void SetStateTextMethod(string str)
     {
-        StartCoroutine(SetStateText(stateTextDict[true], str));
+        coroutineQueue.Enqueue(SetStateText(stateTextDict[true], str));
+        if(coroutine==null)coroutine = StartCoroutine(StartCoroutines());
     }
     IEnumerator SetStateText(TextMeshProUGUI tmp, string str)
     {
@@ -508,7 +507,9 @@ public class ScoreManager : SingletonMonoBehaviour<ScoreManager>
     {
         while (coroutineQueue.Count > 0)
         {
-            yield return coroutineQueue.Dequeue();
+            Debug.Log(coroutineQueue.Count);
+            yield return StartCoroutine(coroutineQueue.Dequeue());
         }
+        coroutine = null;
     }
 }
