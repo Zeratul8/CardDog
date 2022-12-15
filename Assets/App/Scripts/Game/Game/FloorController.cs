@@ -144,6 +144,10 @@ public class FloorController : MonoBehaviour
         CardClass data = param[0] as CardClass;
         bool isPlaying = (bool)param[1];
         int month = data.month;
+        bool isBomb = false;
+        if(param.Length > 2){
+            isBomb = (bool)param[2];
+        }
         
         if (month < 0)
         {
@@ -173,7 +177,7 @@ public class FloorController : MonoBehaviour
         floorActive[month]++;
         if (isPlaying || data.month < 0)
         {
-            StartCoroutine(PlayNext());
+            if(!isBomb) StartCoroutine(PlayNext());
         }
         else{
             if(PlayerManager.Instance.playState != PlayerManager.PlayState.InitGame)
@@ -181,7 +185,7 @@ public class FloorController : MonoBehaviour
                 StartCoroutine(AddPoint(true));
             }
         }
-        PlayerManager.Instance.SetBorderOn(month);
+        if(data.month >= 0) PlayerManager.Instance.SetBorderOn(data.month);
     }
     public void FinishGame(params object[] param){
         for(int i = 0 ; i<monthCount ; i++){
@@ -200,6 +204,7 @@ public class FloorController : MonoBehaviour
     void SetReady(params object[] param)
     {
         bool isMine = (bool)param[0];
+                
         StartCoroutine(AddPoint(isMine));
     }
     IEnumerator AddPoint(bool isMine){
@@ -228,7 +233,7 @@ public class FloorController : MonoBehaviour
         while (playedCardQueue.Count > 0)
         {
             CardClass card = playedCardQueue.Dequeue();
-            bool isSameMonth = playedCardQueue.Count > 0 && playedCardQueue.Peek().month == card.month;
+            bool isSameMonth = playedCardQueue.Count == 1 && playedCardQueue.Peek().month == card.month;
             switch (floorActive[card.month] - jokerQueue.Count)
             {
                 case 1:
@@ -268,20 +273,24 @@ public class FloorController : MonoBehaviour
                     break;
                 case 4:
                     if (isSameMonth)
-                    {
+                    {                        
                         ScoreManager.Instance.SetStateTextMethod("µû´Ú");
-                        
                     }
                     else
                     {
-                        if (poopDict[card.month])
+                        if (playedCardQueue.Count == 1)
                         {
-                            ScoreManager.Instance.SetStateTextMethod("ÀÚ»¶Àº µÎ Àå");
-                            TakeACard();
-                        }else
-                            ScoreManager.Instance.SetStateTextMethod("»¶ ¸Ô±â");
 
-                        poopDict[card.month] = false;
+                            if (poopDict[card.month])
+                            {
+                                ScoreManager.Instance.SetStateTextMethod("ÀÚ»¶Àº µÎ Àå");
+                                TakeACard();
+                            }
+                            else
+                                ScoreManager.Instance.SetStateTextMethod("»¶ ¸Ô±â");
+
+                            poopDict[card.month] = false;
+                        }
                         
                     }
                     TakeACard();

@@ -20,6 +20,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     public bool isMyTurn = false;
     public PlayState playState = PlayState.Wating;
     public Dictionary<int, bool> floorDict = new Dictionary<int, bool>();
+    public List<int> floorCountList = new List<int>(monthCount);
 
     #endregion
 
@@ -60,6 +61,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         intList = new List<int>();
         for(int i = 0 ; i< monthCount ; i++ ){
             floorDict.Add(i, false);
+            floorCountList.Add(0);
         }
         for (int i = 0; i < DeckMaxCount; i++)
         {
@@ -90,9 +92,11 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     #region Public Methods
     public void SetBorderOff(int month){
         floorDict[month] = false;
+        floorCountList[month] = 0;
     }
     public void SetBorderOn(int month){
         floorDict[month] = true;
+        floorCountList[month]++;
     }
 
     #endregion
@@ -106,6 +110,7 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
         }
         for(int i = 0 ; i<monthCount; i++){
             SetBorderOff(i);
+            floorCountList[i]  = 0;
         }
     }
     void ClickStartButton(params object[] param)
@@ -122,10 +127,10 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         // int count = intList.Count;
         // int count = DeckMaxCount;
-        int count = DeckMaxCount;
-        for (int i = 3; i < count; i++)
+        int count = DeckMaxCount -1;
+        for (int i = 4; i < count; i++)
         {
-            int r = Random.Range(3, count);
+            int r = Random.Range(4, count);
             int j = intList[i];
             intList[i] = intList[r];
             intList[r] = j;
@@ -136,9 +141,16 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             intList[4] = tmp;
 
             tmp = intList[2];
-            intList[2] = intList[30];
-            intList[30] = tmp;
-
+            intList[2] = intList[5];
+            intList[5] = tmp;
+            
+            tmp = intList[3];
+            intList[3] = intList[6];
+            intList[6] = tmp;
+        
+            tmp = intList[49];
+            intList[49] = intList[1];
+            intList[1] = tmp;
         }
         
         // deck.Clear();
@@ -247,8 +259,8 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
             }
         }
         
-        SortHand();
         EventManager.CallEvent(Constants.READY_TO_PLAY, isFirst);
+        SortHand();
         if (isFirst)
         {
             StartTurn();
@@ -290,15 +302,48 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     void SortHand()
     {
         Dictionary<int, Transform> indexDic = new Dictionary<int, Transform>();
+        Dictionary<int, int> monthDict = new Dictionary<int, int>();
         for (int i = 0; i < HandMaxCount; i++)
         {
-            int index = myCards[i].GetCardClass().index;
+            CardClass cardClass = myCards[i].GetCardClass();
+            int index = cardClass.index;
             indexDic.Add(index, myCardObject[i].transform);
+
+            if (monthDict.ContainsKey(cardClass.month))
+            {
+                monthDict[cardClass.month]++;
+            }
+            else
+            {
+                monthDict.Add(cardClass.month, 1);
+            }
         }
+        
         indexDic = indexDic.OrderBy(item => item.Key).ToDictionary(x=>x.Key, x=>x.Value);
         foreach(Transform tr in indexDic.Values){
             tr.SetAsLastSibling();
         }
+        foreach (int key in monthDict.Keys)
+        {
+            switch (monthDict[key])
+            {
+                case 4:
+                //ÃÑÅë?
+                case 3:
+                EventManager.CallEvent(Constants.CHECK_SHAKE, key);
+                //Èçµé±â ¿Â
+                    break;
+                case 2:
+                    if (floorCountList[key] == 2)
+                    {
+                        //ÆøÅº On
+                        EventManager.CallEvent(Constants.CHECK_SHAKE, key);
+                    }
+                    break;
+
+            }
+        }
+        
     }
     void MinusHand(object[] param)
     {

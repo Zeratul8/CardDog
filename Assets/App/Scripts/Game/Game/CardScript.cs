@@ -11,6 +11,9 @@ public class CardScript : MonoBehaviour
     Image image;
     GameUI gameUI;
     GameObject borderLine;
+    Image shakeImage;
+    bool isShake = false;
+    bool isBomb = false;
     #endregion
 
     #region Properties
@@ -26,17 +29,23 @@ public class CardScript : MonoBehaviour
         gameUI = GetComponentInParent<GameUI>();
         EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
         EventManager.AddListener(Constants.READY_TO_PLAY, ReadyToPlay);
+        EventManager.AddListener(Constants.CHECK_SHAKE, CheckShake);
+        EventManager.AddListener(Constants.DROP_BOMB, DropBomb);
         if (transform.childCount > 0)
         {
             borderLine = transform.GetChild(0).gameObject;
             Debug.Log(borderLine.name);
             borderLine.SetActive(false);
+            shakeImage = transform.GetChild(1).GetComponent<Image>();
+            shakeImage.gameObject.SetActive(false);
         }
     }
     
     private void OnDestroy() {
         EventManager.RemoveListener(Constants.FINISH_GAME, FinishGame);
         EventManager.RemoveListener(Constants.READY_TO_PLAY, ReadyToPlay);
+        EventManager.RemoveListener(Constants.CHECK_SHAKE, CheckShake);
+        EventManager.RemoveListener(Constants.DROP_BOMB, DropBomb);
     }
     #endregion
 
@@ -74,6 +83,7 @@ public class CardScript : MonoBehaviour
     }
     void OnClick()
     {
+        string str = "";
         if (PlayerManager.Instance.isMyTurn)
         {
             if (myCardData.index > 47)
@@ -87,15 +97,62 @@ public class CardScript : MonoBehaviour
             }
             else
             {
+                if (isShake)
+                {
+                    str = "흔들기";
+                    if (isBomb)
+                    {
+                        str = "폭탄";
+                        isBomb = false;
+                        EventManager.CallEvent(Constants.DROP_BOMB);
+                    }
+                    shakeImage.gameObject.SetActive(false);
+                    ScoreManager.Instance.SetState(ScoreState.Shake, true);
+                    ScoreManager.Instance.SetStateTextMethod(str);
+                }
                 gameObject.SetActive(false);
                 minusCard();
-                EventManager.CallEvent(Constants.SET_FLOOR_CARD, myCardData, true);
+                EventManager.CallEvent(Constants.SET_FLOOR_CARD, myCardData, true, false);
             }
         }
     }
     void minusCard()
     {
         EventManager.CallEvent(Constants.MINUS_HAND);
+    }
+    void DropBomb(params object[] param)
+    {
+        if(!isBomb) return;
+        if (transform.childCount > 0)
+        {
+            if (isBomb) 
+            {
+                isBomb = false;
+                isShake = false;
+                shakeImage.gameObject.SetActive(false);
+                gameObject.SetActive(false);
+                minusCard();
+                EventManager.CallEvent(Constants.SET_FLOOR_CARD, myCardData, true, true);
+            }
+
+        }
+    }
+    void CheckShake(params object[] param)
+    {
+        if (transform.childCount > 0)
+        {
+            int month = (int)param[0];
+            // if(isShake){
+            //     isShake = false;
+            //     shakeImage.gameObject.SetActive(false);
+            // }
+            if (myCardData.month == month)
+            {
+                isShake = true;
+                shakeImage.gameObject.SetActive(true);
+                shakeImage.sprite = gameUI.shakeSprite[false];
+            }
+        }
     }
     void ReadyToPlay(params object[] param)
     {
@@ -106,6 +163,8 @@ public class CardScript : MonoBehaviour
     {
         if(borderLine != null)borderLine.SetActive(false);
         gameObject.SetActive(false);
+        isShake = false;
+        isBomb = false;
         StopAllCoroutines();
     }
     IEnumerator CheckBorderOn()
@@ -114,6 +173,10 @@ public class CardScript : MonoBehaviour
         {
             yield return new WaitUntil(() => PlayerManager.Instance.floorDict[myCardData.month]);
             borderLine.SetActive(true);
+            if(isShake) {
+                isBomb = borderLine.activeSelf;
+                shakeImage.sprite = gameUI.shakeSprite[isBomb];
+                }
             StartCoroutine(CheckBorderOff());
         }
 
@@ -125,6 +188,9 @@ public class CardScript : MonoBehaviour
             yield return new WaitWhile(() => PlayerManager.Instance.floorDict[myCardData.month]);
             borderLine.SetActive(false);
             StartCoroutine(CheckBorderOn());
+            if(isShake){
+                isShake = false;
+            }
         }
     }
     #endregion

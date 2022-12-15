@@ -20,6 +20,8 @@ public static class Constants
     public const string PLAY_NEXT = "PlayNext";
     public const string ZERO_HAND = "ZeroHand";
     public const string READY_TO_PLAY = "ReadyToPlay";
+    public const string CHECK_SHAKE = "CheckShake";
+    public const string DROP_BOMB = "DropBomb";
 
 
 }

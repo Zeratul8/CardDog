@@ -9,6 +9,12 @@ public class GameUI : MonoBehaviour
     #region Constants and Fields
 
     public List<Sprite> sprites;
+    [SerializeField]
+    Sprite bell;
+    [SerializeField]
+    Sprite bomb;
+
+    public Dictionary<bool, Sprite> shakeSprite; 
     public Button btnStart;
 
     #endregion
@@ -39,6 +45,9 @@ public class GameUI : MonoBehaviour
     private void Awake()
     {
         EventManager.AddListener(Constants.FINISH_GAME, StartGame);
+        shakeSprite = new Dictionary<bool, Sprite>();
+        shakeSprite.Add(true, bomb);
+        shakeSprite.Add(false, bell);
     }
     private void OnDestroy()
     {
