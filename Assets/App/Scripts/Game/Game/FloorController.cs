@@ -16,6 +16,7 @@ public class FloorController : MonoBehaviour
     Dictionary<int, List<CardScript>> floorCards;
     Dictionary<int, bool> poopDict;
     public List<int> floorActive{get; private set;}
+    List<int> jokerList;
     Queue<CardClass> playedCardQueue;
     Queue<CardClass> jokerQueue;
     public GameUI gameUI;
@@ -41,6 +42,10 @@ public class FloorController : MonoBehaviour
         playedCardQueue = new Queue<CardClass>();
         jokerQueue = new Queue<CardClass>();
         poopDict = new Dictionary<int, bool>();
+        jokerList = new List<int>(monthCount);
+        for(int i = 0 ; i <monthCount ; i++){
+            jokerList.Add(0);
+        }
         EventManager.AddListener(Constants.POP_CARD, PopCard);
         EventManager.AddListener(Constants.SET_FLOOR_CARD, SetFloorCard);
         EventManager.AddListener(Constants.FINISH_GAME, FinishGame);
@@ -111,6 +116,7 @@ public class FloorController : MonoBehaviour
     #endregion
 
     #region Methods
+
     
     void InitFloorCard()
     {
@@ -209,32 +215,13 @@ public class FloorController : MonoBehaviour
     }
     IEnumerator AddPoint(bool isMine){
         yield return new WaitForSeconds(0.5f);
-        while(jokerQueue.Count > 0)
-        {
-            CardClass card = jokerQueue.Dequeue();
-            for (int i = 0; i < floorActive[jokerMonth]; i++)
-            {
-                if (floorCards[jokerMonth][i].GetCardClass().Equals(card))
-                {
-                    card = floorCards[jokerMonth][i].RemoveCard();
-                    ScoreManager.Instance.AddPoint(card, isMine);
-                    for(int j = i + 1; j < floorActive[jokerMonth]; j++)
-                    {
-                        CardClass cardClass = floorCards[jokerMonth][j].RemoveCard();
-                        floorCards[jokerMonth][j - 1].SetCard(cardClass);
-                    }
-                }
-
-            }
-            floorActive[jokerMonth]--;
-            
-        }
+        
         CardClass cc;
         while (playedCardQueue.Count > 0)
         {
             CardClass card = playedCardQueue.Dequeue();
             bool isSameMonth = playedCardQueue.Count == 1 && playedCardQueue.Peek().month == card.month;
-            switch (floorActive[card.month] - jokerQueue.Count)
+            switch (floorActive[card.month] - jokerQueue.Count - jokerList[card.month])
             {
                 case 1:
                     break;
@@ -261,6 +248,9 @@ public class FloorController : MonoBehaviour
                         poopDict[card.month] = true;
                         //PassACard();
                         playedCardQueue.Clear();
+                        jokerList[card.month] += jokerQueue.Count;
+                        jokerQueue.Clear();
+                        
                     }
                     else
                     {
@@ -291,7 +281,6 @@ public class FloorController : MonoBehaviour
 
                             poopDict[card.month] = false;
                         }
-                        
                     }
                     TakeACard();
                     for (int i = 0; i < floorActive[card.month]; i++)
@@ -300,10 +289,31 @@ public class FloorController : MonoBehaviour
                         ScoreManager.Instance.AddPoint(cc);
                     }
                     floorActive[card.month] = 0;
+                    jokerList[card.month] = 0;
                     PlayerManager.Instance.SetBorderOff(card.month);
                     break;
             }
             if (isSameMonth) break;
+        }
+        while(jokerQueue.Count > 0)
+        {
+            CardClass card = jokerQueue.Dequeue();
+            for (int i = 0; i < floorActive[jokerMonth]; i++)
+            {
+                if (floorCards[jokerMonth][i].GetCardClass().Equals(card))
+                {
+                    card = floorCards[jokerMonth][i].RemoveCard();
+                    ScoreManager.Instance.AddPoint(card, isMine);
+                    for(int j = i + 1; j < floorActive[jokerMonth]; j++)
+                    {
+                        CardClass cardClass = floorCards[jokerMonth][j].RemoveCard();
+                        floorCards[jokerMonth][j - 1].SetCard(cardClass);
+                    }
+                }
+
+            }
+            floorActive[jokerMonth]--;
+            
         }
     }
     void TakeACard(){
