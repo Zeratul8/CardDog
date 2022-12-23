@@ -165,7 +165,10 @@ public class FloorController : MonoBehaviour
         {
             case PlayerManager.PlayState.MyTurn:
                 if (data.month < 0)
-                { jokerQueue.Enqueue(data); }
+                { 
+                    jokerQueue.Enqueue(data);
+                    jokerList[preMonth]++;
+                }
                 else
                 {
                     playedCardQueue.Enqueue(data);
@@ -174,6 +177,7 @@ public class FloorController : MonoBehaviour
             case PlayerManager.PlayState.InitGame:
                 if(data.month < 0)
                 {
+
                     jokerQueue.Enqueue(data);
                 }
                 break;
@@ -220,12 +224,18 @@ public class FloorController : MonoBehaviour
         while (playedCardQueue.Count > 0)
         {
             CardClass card = playedCardQueue.Dequeue();
-            bool isSameMonth = playedCardQueue.Count == 1 && playedCardQueue.Peek().month == card.month;
-            switch (floorActive[card.month] - jokerQueue.Count - jokerList[card.month])
+            bool isSameMonth = false;
+            if (playedCardQueue.Count > 0)
+            {
+                isSameMonth = playedCardQueue.Peek().month == card.month;
+            }
+            Debug.Log($"jokerQueue : {jokerQueue.Count}\njokerList: {jokerList[card.month]}\nfloorActive: {floorActive[card.month]}");
+            switch (floorActive[card.month] - jokerQueue.Count)
             {
                 case 1:
                     break;
                 case 2:
+                    GetJoker(isMine);
                     for (int i = 0; i < floorActive[card.month]; i++)
                     {
                         cc = floorCards[card.month][i].RemoveCard();
@@ -242,7 +252,6 @@ public class FloorController : MonoBehaviour
                 case 3:
                     if (isSameMonth)
                     {
-                        
                         ScoreManager.Instance.SetStateTextMethod("»¶");
                         ScoreManager.Instance.SetState(ScoreState.Poop, true);
                         poopDict[card.month] = true;
@@ -250,11 +259,11 @@ public class FloorController : MonoBehaviour
                         playedCardQueue.Clear();
                         jokerList[card.month] += jokerQueue.Count;
                         jokerQueue.Clear();
-                        
                     }
                     else
                     {
                         yield return StartCoroutine(SelectCard(card.month));
+                        GetJoker(isMine);
                         cc = floorCards[card.month][2].RemoveCard();
                         ScoreManager.Instance.AddPoint(cc, isMine);
                         floorActive[card.month] -= 2;
@@ -262,6 +271,7 @@ public class FloorController : MonoBehaviour
                     }
                     break;
                 case 4:
+                    GetJoker(isMine);
                     if (isSameMonth)
                     {                        
                         ScoreManager.Instance.SetStateTextMethod("µû´Ú");
@@ -295,7 +305,10 @@ public class FloorController : MonoBehaviour
             }
             if (isSameMonth) break;
         }
-        while(jokerQueue.Count > 0)
+    }
+    void GetJoker(bool isMine)
+    {
+        while (jokerQueue.Count > 0)
         {
             CardClass card = jokerQueue.Dequeue();
             for (int i = 0; i < floorActive[jokerMonth]; i++)
@@ -304,7 +317,7 @@ public class FloorController : MonoBehaviour
                 {
                     card = floorCards[jokerMonth][i].RemoveCard();
                     ScoreManager.Instance.AddPoint(card, isMine);
-                    for(int j = i + 1; j < floorActive[jokerMonth]; j++)
+                    for (int j = i + 1; j < floorActive[jokerMonth]; j++)
                     {
                         CardClass cardClass = floorCards[jokerMonth][j].RemoveCard();
                         floorCards[jokerMonth][j - 1].SetCard(cardClass);
@@ -313,7 +326,7 @@ public class FloorController : MonoBehaviour
 
             }
             floorActive[jokerMonth]--;
-            
+
         }
     }
     void TakeACard(){
