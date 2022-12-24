@@ -167,7 +167,6 @@ public class FloorController : MonoBehaviour
                 if (data.month < 0)
                 { 
                     jokerQueue.Enqueue(data);
-                    jokerList[preMonth]++;
                 }
                 else
                 {
@@ -229,8 +228,9 @@ public class FloorController : MonoBehaviour
             {
                 isSameMonth = playedCardQueue.Peek().month == card.month;
             }
+            Debug.Log($"isSameMonth : {isSameMonth}");
             Debug.Log($"jokerQueue : {jokerQueue.Count}\njokerList: {jokerList[card.month]}\nfloorActive: {floorActive[card.month]}");
-            switch (floorActive[card.month] - jokerQueue.Count)
+            switch (floorActive[card.month] - jokerQueue.Count - jokerList[card.month])
             {
                 case 1:
                     break;
@@ -278,19 +278,15 @@ public class FloorController : MonoBehaviour
                     }
                     else
                     {
-                        if (playedCardQueue.Count == 1)
+                        if (poopDict[card.month])
                         {
-
-                            if (poopDict[card.month])
-                            {
-                                ScoreManager.Instance.SetStateTextMethod("ÀÚ»¶Àº µÎ Àå");
-                                TakeACard();
-                            }
-                            else
-                                ScoreManager.Instance.SetStateTextMethod("»¶ ¸Ô±â");
-
-                            poopDict[card.month] = false;
+                            ScoreManager.Instance.SetStateTextMethod("ÀÚ»¶Àº µÎ Àå");
+                            TakeACard();
                         }
+                        else
+                            ScoreManager.Instance.SetStateTextMethod("»¶ ¸Ô±â");
+
+                        poopDict[card.month] = false;
                     }
                     TakeACard();
                     for (int i = 0; i < floorActive[card.month]; i++)
