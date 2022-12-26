@@ -176,7 +176,6 @@ public class FloorController : MonoBehaviour
             case PlayerManager.PlayState.InitGame:
                 if(data.month < 0)
                 {
-
                     jokerQueue.Enqueue(data);
                 }
                 break;
@@ -213,8 +212,8 @@ public class FloorController : MonoBehaviour
     void SetReady(params object[] param)
     {
         bool isMine = (bool)param[0];
-                
-        StartCoroutine(AddPoint(isMine));
+
+        GetJoker(isMine);
     }
     IEnumerator AddPoint(bool isMine){
         yield return new WaitForSeconds(0.5f);
@@ -233,6 +232,7 @@ public class FloorController : MonoBehaviour
             switch (floorActive[card.month] - jokerQueue.Count - jokerList[card.month])
             {
                 case 1:
+                    GetJoker(isMine);
                     break;
                 case 2:
                     GetJoker(isMine);
@@ -338,7 +338,11 @@ public class FloorController : MonoBehaviour
     }
     IEnumerator SelectCard(int month){
         //ÆË¾÷ ¶ç¿ö¼­ ¼±ÅÃÇÏ±â.
-        int select = Random.Range(0,2);
+        PopUpManager.Instance.SetSelectCard(floorCards[month]);
+
+        yield return new WaitWhile(() => PopUpManager.Instance.selectIndex < 0);
+        int select = PopUpManager.Instance.selectIndex;
+
         CardClass cc = floorCards[month][select].RemoveCard();
         ScoreManager.Instance.AddPoint(cc);
         switch (select)

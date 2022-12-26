@@ -127,32 +127,15 @@ public class PlayerManager : SingletonMonoBehaviour<PlayerManager>
     {
         // int count = intList.Count;
         // int count = DeckMaxCount;
-        int count = DeckMaxCount -1;
-        for (int i = 4; i < count; i++)
+        int count = DeckMaxCount;
+        for (int i = 0; i < count; i++)
         {
             int r = Random.Range(4, count);
             int j = intList[i];
             intList[i] = intList[r];
             intList[r] = j;
         }
-        {
-            int tmp = intList[1];
-            intList[1] = intList[4];
-            intList[4] = tmp;
 
-            tmp = intList[2];
-            intList[2] = intList[5];
-            intList[5] = tmp;
-            
-            tmp = intList[3];
-            intList[3] = intList[29];
-            intList[29] = tmp;
-        
-            tmp = intList[49];
-            intList[49] = intList[28];
-            intList[28] = tmp;
-        }
-        
         // deck.Clear();
         for (int i = 0; i < intList.Count; i++)
         {

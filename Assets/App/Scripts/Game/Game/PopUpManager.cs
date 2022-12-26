@@ -10,7 +10,7 @@ public class PopUpManager : SingletonMonoBehaviour<PopUpManager>
     [SerializeField]
     GameUI gameUI;
     Dictionary<Button, Image> selectButtons;
-    int selectIndex = -1;
+    public int selectIndex = -1;
     
     protected override void OnAwake()
     {
@@ -21,15 +21,17 @@ public class PopUpManager : SingletonMonoBehaviour<PopUpManager>
         base.OnStart();
         Button[] selectButton;
         selectButton = selectObject.GetComponentsInChildren<Button>();
+        selectButtons = new Dictionary<Button, Image>();
         for(int i = 0; i < selectButton.Length; i++)
         {
             selectButtons.Add(selectButton[i], selectButton[i].GetComponent<Image>());
             int index = i;
-            selectButton[i].onClick.AddListener(() => { });
+            selectButton[i].onClick.AddListener(() => { selectIndex = index; });
         }
+        gameObject.SetActive(false);
     }
 
-    public int SetSelectCard(List<CardScript> cards)
+    public void SetSelectCard(List<CardScript> cards)
     {
         gameObject.SetActive(true);
         selectObject.SetActive(true);
@@ -41,6 +43,13 @@ public class PopUpManager : SingletonMonoBehaviour<PopUpManager>
             image.sprite = gameUI.sprites[cards[index].GetCardClass().index];
             index++;
         }
-        return 0;
+        StartCoroutine(select());
+    }
+    IEnumerator select()
+    {
+        yield return new WaitWhile(() => selectIndex < 0);
+        Debug.Log($"selectIndex : {selectIndex}");
+        gameObject.SetActive(false);
+        selectIndex = -1;
     }
 }
